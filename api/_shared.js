@@ -100,7 +100,8 @@ export const WEEKLY_LIMIT = 30;
 export const MONTHLY_LIMIT = 150;
 
 export function getEnv(name, fallbackName) {
-  return process.env[name] || (fallbackName ? process.env[fallbackName] : undefined);
+  const value = process.env[name] || (fallbackName ? process.env[fallbackName] : undefined);
+  return typeof value === "string" ? value.trim() : value;
 }
 
 export function getSupabase() {
