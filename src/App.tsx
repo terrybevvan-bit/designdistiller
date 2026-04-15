@@ -400,15 +400,15 @@ export default function App() {
                 </Button>
               )}
               <Button
-                variant="ghost"
-                size="icon"
+                variant="outline"
                 onClick={() => {
                   signOut();
                   navigate("/");
                 }}
-                className="text-muted-foreground hover:text-foreground hover:bg-destructive/10"
+                className="gap-2 border-border text-muted-foreground hover:bg-destructive/10 hover:text-foreground"
               >
                 <LogOut className="h-5 w-5" />
+                <span>Sign out</span>
               </Button>
             </div>
           </div>
