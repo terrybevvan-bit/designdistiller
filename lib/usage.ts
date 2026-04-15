@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-const FREE_MONTHLY_LIMIT = 3; // 3 analyses total per month for free
+const FREE_WEEKLY_LIMIT = 5;
 const WEEKLY_LIMIT = 30;
 const MONTHLY_LIMIT = 150;
 const ADMIN_MONTHLY_LIMIT = Number.MAX_SAFE_INTEGER;
@@ -13,12 +13,13 @@ function getTierLimit(subscriptionTier: string) {
     case "premium":
       return MONTHLY_LIMIT;
     default:
-      return FREE_MONTHLY_LIMIT;
+      return FREE_WEEKLY_LIMIT;
   }
 }
 
 function getResetWindowMs(subscriptionTier: string) {
   switch (subscriptionTier) {
+    case "free":
     case "weekly":
       return 7 * 24 * 60 * 60 * 1000;
     case "monthly":
@@ -30,8 +31,8 @@ function getResetWindowMs(subscriptionTier: string) {
 
 export async function checkUsageLimit(userId: string): Promise<{
   isLimited: boolean;
-  imagesUsedThisMonth: number;
-  remainingThisMonth: number;
+  imagesUsedThisPeriod: number;
+  remainingThisPeriod: number;
 }> {
   try {
     const { data: profile } = await supabase
@@ -47,8 +48,8 @@ export async function checkUsageLimit(userId: string): Promise<{
     if (profile.is_admin) {
       return {
         isLimited: false,
-        imagesUsedThisMonth: profile.images_used_this_month || 0,
-        remainingThisMonth: ADMIN_MONTHLY_LIMIT,
+        imagesUsedThisPeriod: profile.images_used_this_month || 0,
+        remainingThisPeriod: ADMIN_MONTHLY_LIMIT,
       };
     }
 
@@ -67,8 +68,8 @@ export async function checkUsageLimit(userId: string): Promise<{
 
       return {
         isLimited: false,
-        imagesUsedThisMonth: 0,
-        remainingThisMonth: getTierLimit(profile.subscription_tier),
+        imagesUsedThisPeriod: 0,
+        remainingThisPeriod: getTierLimit(profile.subscription_tier),
       };
     }
 
@@ -78,8 +79,8 @@ export async function checkUsageLimit(userId: string): Promise<{
 
     return {
       isLimited: remaining === 0,
-      imagesUsedThisMonth: profile.images_used_this_month || 0,
-      remainingThisMonth: remaining,
+      imagesUsedThisPeriod: profile.images_used_this_month || 0,
+      remainingThisPeriod: remaining,
     };
   } catch (error) {
     console.error("Error checking usage limit:", error);

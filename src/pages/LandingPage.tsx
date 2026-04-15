@@ -1,12 +1,33 @@
+import * as React from "react";
 import { motion } from "motion/react";
 import { Sparkles, ArrowRight, Check } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { cn } from "../../lib/utils";
+
+type PlanChoice = "free" | "weekly" | "monthly";
 
 export function LandingPage() {
   const { signInWithGoogle, session } = useAuth();
   const navigate = useNavigate();
+  const [selectedPlan, setSelectedPlan] = React.useState<PlanChoice>("weekly");
+
+  const handleGetStarted = async (plan: PlanChoice = "free") => {
+    try {
+      setSelectedPlan(plan);
+      if (plan === "free") {
+        window.sessionStorage.removeItem("designdistiller:selected-plan");
+      } else {
+        window.sessionStorage.setItem("designdistiller:selected-plan", plan);
+      }
+      await signInWithGoogle();
+    } catch (error) {
+      console.error("Landing page sign-in failed", error);
+      toast.error("Sign-in could not start. Please try again.");
+    }
+  };
 
   const scrollToLearnMore = () => {
     document.getElementById("learn-more")?.scrollIntoView({
@@ -31,12 +52,13 @@ export function LandingPage() {
   const pricingPlans = [
     {
       name: "Free",
+      id: "free" as const,
       price: "$0",
-      limit: "3 analyses/month",
+      limit: "5 analyses/week",
       features: [
         "Best-quality design analysis",
         "PNG and SVG prompts",
-        "3 analyses per month",
+        "5 analyses per week",
         "Perfect for trying the workflow",
       ],
       cta: "Get Started Free",
@@ -44,6 +66,7 @@ export function LandingPage() {
     },
     {
       name: "Weekly",
+      id: "weekly" as const,
       price: "$7",
       period: "/week",
       limit: "30 analyses/week",
@@ -58,6 +81,7 @@ export function LandingPage() {
     },
     {
       name: "Monthly",
+      id: "monthly" as const,
       price: "$15",
       period: "/month",
       limit: "150 analyses/month",
@@ -89,7 +113,8 @@ export function LandingPage() {
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
             <Button
-              onClick={signInWithGoogle}
+              type="button"
+              onClick={() => handleGetStarted("free")}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               Sign In
@@ -122,7 +147,8 @@ export function LandingPage() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button
-              onClick={signInWithGoogle}
+              type="button"
+              onClick={() => handleGetStarted("free")}
               size="lg"
               className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-8 gap-2"
             >
@@ -198,13 +224,32 @@ export function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.2 }}
-                className={`rounded-lg p-8 border transition-all ${
-                  plan.highlighted
-                    ? "border-purple-500 bg-purple-500/5 ring-2 ring-purple-500/20"
-                    : "border-purple-500/20 bg-purple-950/10"
-                }`}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedPlan(plan.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedPlan(plan.id);
+                  }
+                }}
+                className={cn(
+                  "cursor-pointer rounded-lg p-8 border transition-all focus:outline-none focus:ring-2 focus:ring-purple-400/40",
+                  selectedPlan === plan.id
+                    ? "border-purple-400 bg-purple-500/10 ring-2 ring-purple-500/30"
+                    : plan.highlighted
+                      ? "border-purple-500 bg-purple-500/5 ring-2 ring-purple-500/20"
+                      : "border-purple-500/20 bg-purple-950/10"
+                )}
               >
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <h3 className="text-2xl font-bold">{plan.name}</h3>
+                  {selectedPlan === plan.id ? (
+                    <span className="rounded-full border border-purple-400/40 bg-purple-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-purple-200">
+                      Selected
+                    </span>
+                  ) : null}
+                </div>
                 <div className="mb-4">
                   <span className="text-4xl font-bold">{plan.price}</span>
                   {plan.period && (
@@ -213,9 +258,13 @@ export function LandingPage() {
                   <p className="text-gray-400 text-sm mt-2">{plan.limit}</p>
                 </div>
                 <Button
-                  onClick={signInWithGoogle}
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleGetStarted(plan.id);
+                  }}
                   className={`w-full mb-6 ${
-                    plan.highlighted
+                    selectedPlan === plan.id || plan.highlighted
                       ? "bg-purple-600 hover:bg-purple-700"
                       : "bg-purple-600/50 hover:bg-purple-600"
                   }`}
@@ -247,7 +296,8 @@ export function LandingPage() {
             workflow with DesignDistiller.
           </p>
           <Button
-            onClick={signInWithGoogle}
+            type="button"
+            onClick={() => handleGetStarted("free")}
             size="lg"
             className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-8"
           >

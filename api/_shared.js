@@ -95,7 +95,7 @@ let cachedSupabase;
 let cachedGemini;
 let cachedStripe;
 
-export const FREE_LIMIT = 3;
+export const FREE_LIMIT = 5;
 export const WEEKLY_LIMIT = 30;
 export const MONTHLY_LIMIT = 150;
 
@@ -247,12 +247,23 @@ export function getTierLimit(subscriptionTier) {
 
 export function getResetWindowMs(subscriptionTier) {
   switch (subscriptionTier) {
+    case "free":
     case "weekly":
       return 7 * 24 * 60 * 60 * 1000;
     case "monthly":
     case "premium":
     default:
       return 30 * 24 * 60 * 60 * 1000;
+  }
+}
+
+export function getTierLabel(subscriptionTier) {
+  switch (subscriptionTier) {
+    case "free":
+    case "weekly":
+      return "week";
+    default:
+      return "month";
   }
 }
 
@@ -306,7 +317,7 @@ export async function checkUsageLimit(userId) {
     allowed: remaining > 0,
     remaining,
     limit,
-    message: `${profile.subscription_tier} tier: ${remaining}/${limit} analyses remaining this month`,
+    message: `${profile.subscription_tier} tier: ${remaining}/${limit} analyses remaining this ${getTierLabel(profile.subscription_tier)}`,
   };
 }
 

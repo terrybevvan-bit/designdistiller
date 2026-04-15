@@ -163,7 +163,7 @@ async function checkUsageLimit(
     }
 
     const resetWindowMs =
-      profile.subscription_tier === "weekly"
+      profile.subscription_tier === "free" || profile.subscription_tier === "weekly"
         ? 7 * 24 * 60 * 60 * 1000
         : 30 * 24 * 60 * 60 * 1000;
     const lastReset = profile.month_reset ? new Date(profile.month_reset).getTime() : 0;
@@ -180,6 +180,8 @@ async function checkUsageLimit(
       const limit =
         profile.subscription_tier === "weekly"
           ? 30
+          : profile.subscription_tier === "free"
+            ? 5
           : profile.subscription_tier === "monthly" || profile.subscription_tier === "premium"
             ? 150
             : 3;
@@ -189,6 +191,8 @@ async function checkUsageLimit(
     const limit =
       profile.subscription_tier === "weekly"
         ? 30
+        : profile.subscription_tier === "free"
+          ? 5
         : profile.subscription_tier === "monthly" || profile.subscription_tier === "premium"
           ? 150
           : 3;
@@ -198,7 +202,7 @@ async function checkUsageLimit(
       allowed: remaining > 0,
       remaining,
       limit,
-      message: `${profile.subscription_tier} tier: ${remaining}/${limit} analyses remaining this month`,
+      message: `${profile.subscription_tier} tier: ${remaining}/${limit} analyses remaining this ${profile.subscription_tier === "free" || profile.subscription_tier === "weekly" ? "week" : "month"}`,
     };
   } catch (error) {
     console.error("Error checking usage limit:", error);

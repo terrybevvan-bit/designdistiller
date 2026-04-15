@@ -46,6 +46,7 @@ const LOADING_MESSAGES = [
 ];
 
 export default function App() {
+  const FREE_LIMIT = 5;
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const { user, session, signOut, refreshUserProfile } = useAuth();
@@ -59,9 +60,10 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [usageLimit, setUsageLimit] = useState<{ isLimited: boolean; remainingThisMonth: number; imagesUsedThisMonth: number } | null>(null);
+  const [usageLimit, setUsageLimit] = useState<{ isLimited: boolean; remainingThisPeriod: number; imagesUsedThisPeriod: number } | null>(null);
   const [userInstruction, setUserInstruction] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<"weekly" | "monthly">("weekly");
+  const hasAppliedSelectedPlan = useRef(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,6 +86,18 @@ export default function App() {
   React.useEffect(() => {
     checkLimit();
   }, [checkLimit]);
+
+  React.useEffect(() => {
+    if (!session?.user?.id || hasAppliedSelectedPlan.current) return;
+
+    const pendingPlan = window.sessionStorage.getItem("designdistiller:selected-plan");
+    if (pendingPlan === "weekly" || pendingPlan === "monthly") {
+      setSelectedPlan(pendingPlan);
+      toast.message(`${pendingPlan === "weekly" ? "Weekly" : "Monthly"} plan selected`);
+    }
+
+    hasAppliedSelectedPlan.current = true;
+  }, [session?.user?.id]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,7 +145,7 @@ export default function App() {
 
     // Check usage limit
     if (usageLimit?.isLimited && user?.subscription_tier === "free" && !user?.is_admin) {
-      toast.error("You've reached your free limit. Upgrade for more high-quality analyses.");
+      toast.error("You've reached your free weekly limit. Upgrade for more high-quality analyses.");
       return;
     }
 
@@ -304,7 +318,7 @@ export default function App() {
                     ) : (
                       <>
                         <Badge variant="outline">
-                          {usageLimit?.remainingThisMonth}/{3} left
+                          {usageLimit?.remainingThisPeriod}/{FREE_LIMIT} left
                         </Badge>
                         <div className="flex items-center gap-2">
                           <div className="flex rounded-md border border-purple-300/30 bg-background/60 p-1">
