@@ -1,8 +1,32 @@
 import { supabase } from "./supabase";
 
 const FREE_MONTHLY_LIMIT = 3; // 3 analyses total per month for free
-const PRO_MONTHLY_LIMIT = 100; // 100 analyses per month for pro
+const WEEKLY_LIMIT = 30;
+const MONTHLY_LIMIT = 150;
 const ADMIN_MONTHLY_LIMIT = Number.MAX_SAFE_INTEGER;
+
+function getTierLimit(subscriptionTier: string) {
+  switch (subscriptionTier) {
+    case "weekly":
+      return WEEKLY_LIMIT;
+    case "monthly":
+    case "premium":
+      return MONTHLY_LIMIT;
+    default:
+      return FREE_MONTHLY_LIMIT;
+  }
+}
+
+function getResetWindowMs(subscriptionTier: string) {
+  switch (subscriptionTier) {
+    case "weekly":
+      return 7 * 24 * 60 * 60 * 1000;
+    case "monthly":
+    case "premium":
+    default:
+      return 30 * 24 * 60 * 60 * 1000;
+  }
+}
 
 export async function checkUsageLimit(userId: string): Promise<{
   isLimited: boolean;
@@ -28,13 +52,11 @@ export async function checkUsageLimit(userId: string): Promise<{
       };
     }
 
-    // Check if we need to reset monthly counter
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    const lastResetMonth = profile.month_reset?.substring(0, 7);
+    const now = Date.now();
+    const lastReset = profile.month_reset ? new Date(profile.month_reset).getTime() : 0;
+    const resetWindowMs = getResetWindowMs(profile.subscription_tier);
 
-    if (lastResetMonth !== currentMonth) {
-      // Reset the counter for new month
+    if (!lastReset || now - lastReset >= resetWindowMs) {
       await supabase
         .from("user_profiles")
         .update({
@@ -46,12 +68,12 @@ export async function checkUsageLimit(userId: string): Promise<{
       return {
         isLimited: false,
         imagesUsedThisMonth: 0,
-        remainingThisMonth: profile.subscription_tier === "premium" ? PRO_MONTHLY_LIMIT : FREE_MONTHLY_LIMIT,
+        remainingThisMonth: getTierLimit(profile.subscription_tier),
       };
     }
 
     // Determine limit based on subscription
-    const limit = profile.subscription_tier === "premium" ? PRO_MONTHLY_LIMIT : FREE_MONTHLY_LIMIT;
+    const limit = getTierLimit(profile.subscription_tier);
     const remaining = Math.max(0, limit - (profile.images_used_this_month || 0));
 
     return {
@@ -117,7 +139,7 @@ export async function incrementUsageCount(
 
 export async function getUserSubscriptionStatus(
   userId: string
-): Promise<"free" | "premium"> {
+): Promise<"free" | "weekly" | "monthly" | "premium"> {
   try {
     const { data: profile } = await supabase
       .from("user_profiles")

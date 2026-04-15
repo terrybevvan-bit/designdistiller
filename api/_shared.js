@@ -95,6 +95,10 @@ let cachedSupabase;
 let cachedGemini;
 let cachedStripe;
 
+export const FREE_LIMIT = 3;
+export const WEEKLY_LIMIT = 30;
+export const MONTHLY_LIMIT = 150;
+
 export function getEnv(name, fallbackName) {
   return process.env[name] || (fallbackName ? process.env[fallbackName] : undefined);
 }
@@ -228,6 +232,29 @@ export function parseResponse(text) {
   return sections;
 }
 
+export function getTierLimit(subscriptionTier) {
+  switch (subscriptionTier) {
+    case "weekly":
+      return WEEKLY_LIMIT;
+    case "monthly":
+    case "premium":
+      return MONTHLY_LIMIT;
+    default:
+      return FREE_LIMIT;
+  }
+}
+
+export function getResetWindowMs(subscriptionTier) {
+  switch (subscriptionTier) {
+    case "weekly":
+      return 7 * 24 * 60 * 60 * 1000;
+    case "monthly":
+    case "premium":
+    default:
+      return 30 * 24 * 60 * 60 * 1000;
+  }
+}
+
 export async function checkUsageLimit(userId) {
   const supabase = getSupabase();
   const { data: profile } = await supabase
@@ -254,11 +281,11 @@ export async function checkUsageLimit(userId) {
     };
   }
 
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const lastResetMonth = profile.month_reset?.substring(0, 7);
+  const now = Date.now();
+  const lastReset = profile.month_reset ? new Date(profile.month_reset).getTime() : 0;
+  const resetWindowMs = getResetWindowMs(profile.subscription_tier);
 
-  if (lastResetMonth !== currentMonth) {
+  if (!lastReset || now - lastReset >= resetWindowMs) {
     await supabase
       .from("user_profiles")
       .update({
@@ -267,11 +294,11 @@ export async function checkUsageLimit(userId) {
       })
       .eq("id", userId);
 
-    const limit = profile.subscription_tier === "premium" ? 100 : 3;
-    return { allowed: true, remaining: limit, limit, message: "Monthly counter reset" };
+    const limit = getTierLimit(profile.subscription_tier);
+    return { allowed: true, remaining: limit, limit, message: "Usage window reset" };
   }
 
-  const limit = profile.subscription_tier === "premium" ? 100 : 3;
+  const limit = getTierLimit(profile.subscription_tier);
   const remaining = Math.max(0, limit - (profile.images_used_this_month || 0));
 
   return {

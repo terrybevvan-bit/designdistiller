@@ -60,6 +60,8 @@ export default function App() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [usageLimit, setUsageLimit] = useState<{ isLimited: boolean; remainingThisMonth: number; imagesUsedThisMonth: number } | null>(null);
+  const [userInstruction, setUserInstruction] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<"weekly" | "monthly">("weekly");
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -129,7 +131,7 @@ export default function App() {
 
     // Check usage limit
     if (usageLimit?.isLimited && user?.subscription_tier === "free" && !user?.is_admin) {
-      toast.error("You've reached your monthly limit of 3 analyses. Upgrade to Pro for 100/month.");
+      toast.error("You've reached your free limit. Upgrade for more high-quality analyses.");
       return;
     }
 
@@ -144,7 +146,7 @@ export default function App() {
     }, 3000);
 
     try {
-      const analysisResult = await analyzeImage(image, mimeType, session.user.id);
+      const analysisResult = await analyzeImage(image, mimeType, session.user.id, userInstruction);
       setResult(analysisResult);
       
       // Increment usage count
@@ -176,6 +178,7 @@ export default function App() {
     setGeneratedImage(null);
     setIsAnalyzing(false);
     setIsGenerating(false);
+    setUserInstruction("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -195,6 +198,7 @@ export default function App() {
         body: JSON.stringify({
           userId: user.id,
           userEmail: user.email,
+          plan: selectedPlan,
         }),
       });
 
@@ -287,23 +291,46 @@ export default function App() {
                         <Zap className="h-3 w-3 mr-1" />
                         Admin
                       </Badge>
-                    ) : user.subscription_tier === "premium" ? (
+                    ) : user.subscription_tier === "monthly" || user.subscription_tier === "premium" ? (
                       <Badge variant="default" className="bg-purple-600">
                         <Zap className="h-3 w-3 mr-1" />
-                        Pro
+                        Monthly
+                      </Badge>
+                    ) : user.subscription_tier === "weekly" ? (
+                      <Badge variant="default" className="bg-amber-600">
+                        <Zap className="h-3 w-3 mr-1" />
+                        Weekly
                       </Badge>
                     ) : (
                       <>
                         <Badge variant="outline">
                           {usageLimit?.remainingThisMonth}/{3} left
                         </Badge>
-                        <Button
-                          size="sm"
-                          onClick={handleUpgradeClick}
-                          className="bg-purple-600 hover:bg-purple-700 text-white text-xs"
-                        >
-                          Upgrade
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <div className="flex rounded-md border border-purple-300/30 bg-background/60 p-1">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPlan("weekly")}
+                              className={`rounded px-2 py-1 text-[10px] ${selectedPlan === "weekly" ? "bg-amber-600 text-white" : "text-muted-foreground"}`}
+                            >
+                              Weekly
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPlan("monthly")}
+                              className={`rounded px-2 py-1 text-[10px] ${selectedPlan === "monthly" ? "bg-purple-600 text-white" : "text-muted-foreground"}`}
+                            >
+                              Monthly
+                            </button>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={handleUpgradeClick}
+                            className="bg-purple-600 hover:bg-purple-700 text-white text-xs"
+                          >
+                            Upgrade
+                          </Button>
+                        </div>
                       </>
                     )}
                   </div>
@@ -416,6 +443,23 @@ export default function App() {
                 </motion.div>
               )}
             </section>
+
+            <Card className="border-none shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Optional Instruction</CardTitle>
+                <CardDescription>
+                  Tell the AI what to change or preserve. Example: "Keep the layout, but change the green lettering to deep red."
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <textarea
+                  value={userInstruction}
+                  onChange={(e) => setUserInstruction(e.target.value)}
+                  placeholder="Example: Change the green lettering to red, keep the flowers, and make the text cleaner for print."
+                  className="min-h-28 w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none ring-0 transition-colors placeholder:text-muted-foreground focus:border-indigo-500"
+                />
+              </CardContent>
+            </Card>
 
             {/* Instructions / Tips */}
             <Card className="border-none bg-indigo-50/50 dark:bg-indigo-900/10 shadow-none">

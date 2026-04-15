@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email VARCHAR(255) NOT NULL UNIQUE,
-  subscription_tier VARCHAR(20) DEFAULT 'free' CHECK (subscription_tier IN ('free', 'premium')),
+  subscription_tier VARCHAR(20) DEFAULT 'free' CHECK (subscription_tier IN ('free', 'weekly', 'monthly', 'premium')),
   is_admin BOOLEAN NOT NULL DEFAULT FALSE,
   images_used_this_month INTEGER DEFAULT 0,
   month_reset TIMESTAMP DEFAULT NOW(),
@@ -13,6 +13,17 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 
 ALTER TABLE user_profiles
   ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE user_profiles
+  DROP CONSTRAINT IF EXISTS user_profiles_subscription_tier_check;
+
+ALTER TABLE user_profiles
+  ADD CONSTRAINT user_profiles_subscription_tier_check
+  CHECK (subscription_tier IN ('free', 'weekly', 'monthly', 'premium'));
+
+UPDATE public.user_profiles
+SET subscription_tier = 'monthly'
+WHERE subscription_tier = 'premium';
 
 -- Create usage_analytics table
 CREATE TABLE IF NOT EXISTS usage_analytics (

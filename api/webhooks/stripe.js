@@ -1,5 +1,13 @@
 import { getStripe, getSupabase, readRawBody, sendJson } from "../_shared.js";
 
+function getSubscriptionTier(subscription) {
+  const metadataPlan = subscription.metadata?.plan;
+  if (metadataPlan === "weekly") {
+    return "weekly";
+  }
+  return "monthly";
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -28,8 +36,10 @@ export default async function handler(req, res) {
           await supabase
             .from("user_profiles")
             .update({
-              subscription_tier: "premium",
+              subscription_tier: getSubscriptionTier(subscription),
               stripe_customer_id: subscription.customer,
+              images_used_this_month: 0,
+              month_reset: new Date().toISOString(),
             })
             .eq("id", userId);
         }

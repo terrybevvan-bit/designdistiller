@@ -26,7 +26,8 @@ interface AnalyzePayload {
 export async function analyzeImage(
   base64Image: string,
   mimeType: string,
-  userId: string
+  userId: string,
+  userInstruction?: string
 ): Promise<AnalysisResult> {
   const response = await fetch(`${getApiBaseUrl()}/api/analyze`, {
     method: "POST",
@@ -37,6 +38,7 @@ export async function analyzeImage(
       image: base64Image,
       mimeType,
       userId,
+      userInstruction,
     }),
   });
 

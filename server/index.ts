@@ -162,13 +162,13 @@ async function checkUsageLimit(
       };
     }
 
-    // Check if we need to reset monthly counter
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    const lastResetMonth = profile.month_reset?.substring(0, 7);
+    const resetWindowMs =
+      profile.subscription_tier === "weekly"
+        ? 7 * 24 * 60 * 60 * 1000
+        : 30 * 24 * 60 * 60 * 1000;
+    const lastReset = profile.month_reset ? new Date(profile.month_reset).getTime() : 0;
 
-    if (lastResetMonth !== currentMonth) {
-      // Reset the counter for new month
+    if (!lastReset || Date.now() - lastReset >= resetWindowMs) {
       await supabase
         .from("user_profiles")
         .update({
@@ -177,12 +177,21 @@ async function checkUsageLimit(
         })
         .eq("id", userId);
 
-      const limit = profile.subscription_tier === "premium" ? 100 : 3;
-      return { allowed: true, remaining: limit, limit, message: "Monthly counter reset" };
+      const limit =
+        profile.subscription_tier === "weekly"
+          ? 30
+          : profile.subscription_tier === "monthly" || profile.subscription_tier === "premium"
+            ? 150
+            : 3;
+      return { allowed: true, remaining: limit, limit, message: "Usage window reset" };
     }
 
-    // Premium users have 100/month, free users have 3/month
-    const limit = profile.subscription_tier === "premium" ? 100 : 3;
+    const limit =
+      profile.subscription_tier === "weekly"
+        ? 30
+        : profile.subscription_tier === "monthly" || profile.subscription_tier === "premium"
+          ? 150
+          : 3;
     const remaining = Math.max(0, limit - (profile.images_used_this_month || 0));
 
     return {
@@ -262,7 +271,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 // Analyze image endpoint
 app.post("/api/analyze", async (req: Request, res: Response) => {
   try {
-    const { image, mimeType, userId } = req.body;
+    const { image, mimeType, userId, userInstruction } = req.body;
 
     if (!image || !mimeType || !userId) {
       return res.status(400).json({
@@ -292,7 +301,14 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
             },
           },
           {
-            text: "Analyze this image and provide the print-design extraction details according to your instructions.",
+            text: [
+              "Analyze this image and provide the print-design extraction details according to your instructions.",
+              userInstruction?.trim()
+                ? `User instruction to apply while extracting or adapting the design: ${userInstruction.trim()}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join("\n\n"),
           },
         ],
       },
@@ -332,7 +348,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
 // Checkout endpoint
 app.post("/api/checkout", async (req: Request, res: Response) => {
   try {
-    const { userId, userEmail } = req.body;
+    const { userId, userEmail, plan } = req.body;
 
     if (!userId || !userEmail) {
       return res.status(400).json({
@@ -340,7 +356,7 @@ app.post("/api/checkout", async (req: Request, res: Response) => {
       });
     }
 
-    const sessionId = await createCheckoutSession(userId, userEmail);
+    const sessionId = await createCheckoutSession(userId, userEmail, plan === "weekly" ? "weekly" : "monthly");
     res.json({ sessionId, success: true });
   } catch (error: any) {
     console.error("Error creating checkout session:", error);

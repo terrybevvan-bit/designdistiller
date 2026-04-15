@@ -6,19 +6,33 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
 
 export { stripe };
 
+function getSubscriptionTier(subscription: Stripe.Subscription): "weekly" | "monthly" {
+  if (subscription.metadata?.plan === "weekly") {
+    return "weekly";
+  }
+
+  return "monthly";
+}
+
 // Create checkout session
 export async function createCheckoutSession(
   userId: string,
-  userEmail: string
+  userEmail: string,
+  plan: "weekly" | "monthly" = "monthly"
 ): Promise<string> {
   try {
+    const priceId =
+      plan === "weekly"
+        ? process.env.STRIPE_PRICE_ID_WEEKLY || ""
+        : process.env.STRIPE_PRICE_ID_MONTHLY || process.env.STRIPE_PRICE_ID_PRO || "";
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       customer_email: userEmail,
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID_PRO || "",
+          price: priceId,
           quantity: 1,
         },
       ],
@@ -26,6 +40,13 @@ export async function createCheckoutSession(
       cancel_url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/dashboard`,
       metadata: {
         userId,
+        plan,
+      },
+      subscription_data: {
+        metadata: {
+          userId,
+          plan,
+        },
       },
     });
 
@@ -49,12 +70,14 @@ export async function handleStripeWebhook(
         const userId = subscription.metadata?.userId;
 
         if (userId && subscription.status === "active") {
-          // Update user to premium
+          // Update user to active paid plan
           await supabase
             .from("user_profiles")
             .update({
-              subscription_tier: "premium",
+              subscription_tier: getSubscriptionTier(subscription),
               stripe_customer_id: subscription.customer,
+              images_used_this_month: 0,
+              month_reset: new Date().toISOString(),
             })
             .eq("id", userId);
 

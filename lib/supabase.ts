@@ -14,7 +14,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export interface UserProfile {
   id: string;
   email: string;
-  subscription_tier: "free" | "premium";
+  subscription_tier: "free" | "weekly" | "monthly" | "premium";
   is_admin: boolean;
   images_used_this_month: number;
   month_reset: string;

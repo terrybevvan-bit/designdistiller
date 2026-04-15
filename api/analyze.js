@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { image, mimeType, userId } = await readJsonBody(req);
+    const { image, mimeType, userId, userInstruction } = await readJsonBody(req);
 
     if (!image || !mimeType || !userId) {
       return sendJson(res, 400, {
@@ -44,7 +44,14 @@ export default async function handler(req, res) {
             },
           },
           {
-            text: "Analyze this image and provide the print-design extraction details according to your instructions.",
+            text: [
+              "Analyze this image and provide the print-design extraction details according to your instructions.",
+              userInstruction?.trim()
+                ? `User instruction to apply while extracting or adapting the design: ${userInstruction.trim()}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join("\n\n"),
           },
         ],
       },

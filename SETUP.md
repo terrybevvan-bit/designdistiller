@@ -46,7 +46,8 @@ Create a recurring product and collect:
 
 - `VITE_STRIPE_PUBLIC_KEY`
 - `STRIPE_SECRET_KEY`
-- `STRIPE_PRICE_ID_PRO`
+- `STRIPE_PRICE_ID_WEEKLY`
+- `STRIPE_PRICE_ID_MONTHLY`
 - `STRIPE_WEBHOOK_SECRET`
 
 Webhook endpoint:
@@ -70,7 +71,8 @@ GEMINI_API_KEY=your_gemini_api_key_here
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
 VITE_STRIPE_PUBLIC_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PRICE_ID_PRO=price_...
+STRIPE_PRICE_ID_WEEKLY=price_...
+STRIPE_PRICE_ID_MONTHLY=price_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 VITE_API_URL=/api
 VITE_APP_URL=http://localhost:3000
@@ -101,7 +103,8 @@ In the Vercel project, set:
 - `VITE_GEMINI_API_KEY` or `GEMINI_API_KEY`
 - `VITE_STRIPE_PUBLIC_KEY`
 - `STRIPE_SECRET_KEY`
-- `STRIPE_PRICE_ID_PRO`
+- `STRIPE_PRICE_ID_WEEKLY`
+- `STRIPE_PRICE_ID_MONTHLY`
 - `STRIPE_WEBHOOK_SECRET`
 - `VITE_API_URL=/api`
 - `VITE_APP_URL=https://designdistiller.vercel.app`

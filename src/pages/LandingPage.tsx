@@ -27,28 +27,41 @@ export function LandingPage() {
       price: "$0",
       limit: "3 analyses/month",
       features: [
-        "Basic design analysis",
+        "Best-quality design analysis",
         "PNG and SVG prompts",
         "3 analyses per month",
-        "Community support",
+        "Perfect for trying the workflow",
       ],
       cta: "Get Started Free",
       highlighted: false,
     },
     {
-      name: "Pro",
+      name: "Weekly",
+      price: "$7",
+      period: "/week",
+      limit: "30 analyses/week",
+      features: [
+        "30 high-quality analyses",
+        "Fast test-drive tier",
+        "Great for launch weeks and bursts",
+        "Same core quality as paid monthly",
+      ],
+      cta: "Start Weekly",
+      highlighted: true,
+    },
+    {
+      name: "Monthly",
       price: "$15",
       period: "/month",
-      limit: "100 analyses/month",
+      limit: "150 analyses/month",
       features: [
-        "100 analyses per month",
-        "Priority processing",
-        "Advanced analytics",
-        "Email support",
-        "Early access to new features",
+        "150 analyses per month",
+        "Best value for repeat users",
+        "Built for active creators",
+        "Monthly workflow support",
       ],
-      cta: "Upgrade to Pro",
-      highlighted: true,
+      cta: "Go Monthly",
+      highlighted: false,
     },
   ];
 
@@ -146,7 +159,7 @@ export function LandingPage() {
           <h2 className="text-4xl font-bold text-center mb-16">
             What You Get
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}

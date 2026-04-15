@@ -41,7 +41,8 @@ Instead, Vercel deploys:
 Required server-side values:
 
 - `STRIPE_SECRET_KEY`
-- `STRIPE_PRICE_ID_PRO`
+- `STRIPE_PRICE_ID_WEEKLY`
+- `STRIPE_PRICE_ID_MONTHLY`
 - `STRIPE_WEBHOOK_SECRET`
 - `GEMINI_API_KEY` preferred
 - `VITE_GEMINI_API_KEY` supported as a fallback for compatibility

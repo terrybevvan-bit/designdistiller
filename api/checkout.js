@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userId, userEmail } = await readJsonBody(req);
+    const { userId, userEmail, plan } = await readJsonBody(req);
 
     if (!userId || !userEmail) {
       return sendJson(res, 400, {
@@ -20,10 +20,19 @@ export default async function handler(req, res) {
     const appUrl = configuredAppUrl?.startsWith("http")
       ? configuredAppUrl
       : `${req.headers["x-forwarded-proto"] || "https"}://${req.headers.host}`;
-    const priceId = getEnv("STRIPE_PRICE_ID_PRO");
+    const normalizedPlan = plan === "weekly" ? "weekly" : "monthly";
+    const priceId =
+      normalizedPlan === "weekly"
+        ? getEnv("STRIPE_PRICE_ID_WEEKLY")
+        : getEnv("STRIPE_PRICE_ID_MONTHLY", "STRIPE_PRICE_ID_PRO");
 
     if (!priceId) {
-      return sendJson(res, 500, { error: "Missing STRIPE_PRICE_ID_PRO" });
+      return sendJson(res, 500, {
+        error:
+          normalizedPlan === "weekly"
+            ? "Missing STRIPE_PRICE_ID_WEEKLY"
+            : "Missing STRIPE_PRICE_ID_MONTHLY",
+      });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -40,10 +49,12 @@ export default async function handler(req, res) {
       cancel_url: `${appUrl}/dashboard`,
       metadata: {
         userId,
+        plan: normalizedPlan,
       },
       subscription_data: {
         metadata: {
           userId,
+          plan: normalizedPlan,
         },
       },
     });
