@@ -15,6 +15,11 @@ export default async function handler(req, res) {
   }
 
   try {
+    const authHeader = req.headers.authorization;
+    const accessToken = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length)
+      : undefined;
+    const supabase = getSupabase(accessToken);
     const { image, mimeType, userId, userInstruction } = await readJsonBody(req);
 
     if (!image || !mimeType || !userId) {
@@ -23,7 +28,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const limitCheck = await checkUsageLimit(userId);
+    const limitCheck = await checkUsageLimit(userId, supabase);
     if (!limitCheck.allowed) {
       return sendJson(res, 429, {
         error: "Usage limit exceeded",
@@ -66,7 +71,7 @@ export default async function handler(req, res) {
     }
 
     const analysis = parseResponse(responseText);
-    await incrementUsageCount(userId);
+    await incrementUsageCount(userId, supabase);
 
     return sendJson(res, 200, {
       success: true,

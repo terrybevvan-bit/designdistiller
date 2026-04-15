@@ -33,7 +33,7 @@ import { Badge } from "../components/ui/badge";
 import { analyzeImage, recreateArtworkFromImage, type AnalysisResult } from "../lib/gemini";
 import { getApiBaseUrl } from "./lib/api";
 import { useAuth } from "./context/AuthContext";
-import { checkUsageLimit, incrementUsageCount } from "../lib/usage";
+import { checkUsageLimit } from "../lib/usage";
 import { cn } from "../lib/utils";
 
 const LOADING_MESSAGES = [
@@ -160,11 +160,15 @@ export default function App() {
     }, 3000);
 
     try {
-      const analysisResult = await analyzeImage(image, mimeType, session.user.id, userInstruction);
+      const analysisResult = await analyzeImage(
+        image,
+        mimeType,
+        session.user.id,
+        userInstruction,
+        session.access_token
+      );
       setResult(analysisResult);
-      
-      // Increment usage count
-      await incrementUsageCount(session.user.id);
+
       await checkLimit();
       await refreshUserProfile();
       

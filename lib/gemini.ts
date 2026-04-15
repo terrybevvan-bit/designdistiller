@@ -27,12 +27,14 @@ export async function analyzeImage(
   base64Image: string,
   mimeType: string,
   userId: string,
-  userInstruction?: string
+  userInstruction?: string,
+  accessToken?: string
 ): Promise<AnalysisResult> {
   const response = await fetch(`${getApiBaseUrl()}/api/analyze`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
     body: JSON.stringify({
       image: base64Image,

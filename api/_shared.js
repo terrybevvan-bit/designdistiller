@@ -104,15 +104,25 @@ export function getEnv(name, fallbackName) {
   return typeof value === "string" ? value.trim() : value;
 }
 
-export function getSupabase() {
+export function getSupabase(accessToken) {
+  const supabaseUrl = getEnv("VITE_SUPABASE_URL");
+  const supabaseKey = getEnv("VITE_SUPABASE_ANON_KEY");
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
+  }
+
+  if (accessToken) {
+    return createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    });
+  }
+
   if (!cachedSupabase) {
-    const supabaseUrl = getEnv("VITE_SUPABASE_URL");
-    const supabaseKey = getEnv("VITE_SUPABASE_ANON_KEY");
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
-    }
-
     cachedSupabase = createClient(supabaseUrl, supabaseKey);
   }
 
@@ -267,8 +277,7 @@ export function getTierLabel(subscriptionTier) {
   }
 }
 
-export async function checkUsageLimit(userId) {
-  const supabase = getSupabase();
+export async function checkUsageLimit(userId, supabase = getSupabase()) {
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("images_used_this_month, month_reset, subscription_tier, is_admin")
@@ -321,8 +330,7 @@ export async function checkUsageLimit(userId) {
   };
 }
 
-export async function incrementUsageCount(userId) {
-  const supabase = getSupabase();
+export async function incrementUsageCount(userId, supabase = getSupabase()) {
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("images_used_this_month, is_admin")
