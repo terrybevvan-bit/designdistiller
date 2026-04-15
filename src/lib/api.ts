@@ -17,7 +17,16 @@ export interface AnalyzeResponse {
   remaining?: number | null; // null = unlimited (premium), number = remaining free
 }
 
-const API_BASE_URL = process.env.VITE_API_URL || "http://localhost:3001";
+export function getApiBaseUrl() {
+  const baseUrl = import.meta.env.VITE_API_URL?.trim();
+  if (!baseUrl || baseUrl === "/api") {
+    return "";
+  }
+
+  return baseUrl.replace(/\/$/, "").replace(/\/api$/, "");
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function analyzeImageViaBackend(
   base64Image: string,

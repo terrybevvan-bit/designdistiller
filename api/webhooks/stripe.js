@@ -1,0 +1,66 @@
+import { getStripe, getSupabase, readRawBody, sendJson } from "../_shared.js";
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return sendJson(res, 405, { error: "Method not allowed" });
+  }
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    return sendJson(res, 400, { error: "Webhook secret not configured" });
+  }
+
+  try {
+    const stripe = getStripe();
+    const supabase = getSupabase();
+    const rawBody = await readRawBody(req);
+    const signature = req.headers["stripe-signature"];
+    const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+
+    switch (event.type) {
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const subscription = event.data.object;
+        const userId = subscription.metadata?.userId;
+
+        if (userId && subscription.status === "active") {
+          await supabase
+            .from("user_profiles")
+            .update({
+              subscription_tier: "premium",
+              stripe_customer_id: subscription.customer,
+            })
+            .eq("id", userId);
+        }
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object;
+        const userId = subscription.metadata?.userId;
+
+        if (userId) {
+          await supabase
+            .from("user_profiles")
+            .update({
+              subscription_tier: "free",
+            })
+            .eq("id", userId);
+        }
+        break;
+      }
+
+      default:
+        break;
+    }
+
+    return sendJson(res, 200, { received: true });
+  } catch (error) {
+    console.error("[api/webhooks/stripe] failed", error);
+    return sendJson(res, 400, {
+      error: "Webhook signature verification failed",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+}

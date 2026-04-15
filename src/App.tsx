@@ -31,6 +31,7 @@ import { ScrollArea } from "../components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { analyzeImage, recreateArtworkFromImage, type AnalysisResult } from "../lib/gemini";
+import { getApiBaseUrl } from "./lib/api";
 import { useAuth } from "./context/AuthContext";
 import { checkUsageLimit, incrementUsageCount } from "../lib/usage";
 import { cn } from "../lib/utils";
@@ -143,7 +144,7 @@ export default function App() {
     }, 3000);
 
     try {
-      const analysisResult = await analyzeImage(image, mimeType);
+      const analysisResult = await analyzeImage(image, mimeType, session.user.id);
       setResult(analysisResult);
       
       // Increment usage count
@@ -185,7 +186,7 @@ export default function App() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/checkout`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -207,15 +208,15 @@ export default function App() {
       }
 
       // Redirect to Stripe Checkout
-      const stripe = await import("@stripe/stripe-js").then((m) =>
+      const stripeClient: any = await import("@stripe/stripe-js").then((m) =>
         m.loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
       );
 
-      if (!stripe) {
+      if (!stripeClient) {
         throw new Error("Failed to load Stripe");
       }
 
-      await stripe.redirectToCheckout({ sessionId });
+      await stripeClient.redirectToCheckout({ sessionId });
     } catch (error) {
       console.error("Error starting checkout:", error);
       toast.error("Failed to start checkout. Please try again.");
