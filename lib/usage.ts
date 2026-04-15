@@ -2,6 +2,7 @@ import { supabase } from "./supabase";
 
 const FREE_MONTHLY_LIMIT = 3; // 3 analyses total per month for free
 const PRO_MONTHLY_LIMIT = 100; // 100 analyses per month for pro
+const ADMIN_MONTHLY_LIMIT = Number.MAX_SAFE_INTEGER;
 
 export async function checkUsageLimit(userId: string): Promise<{
   isLimited: boolean;
@@ -11,12 +12,20 @@ export async function checkUsageLimit(userId: string): Promise<{
   try {
     const { data: profile } = await supabase
       .from("user_profiles")
-      .select("images_used_this_month, month_reset, subscription_tier")
+      .select("images_used_this_month, month_reset, subscription_tier, is_admin")
       .eq("id", userId)
       .single();
 
     if (!profile) {
       throw new Error("User profile not found");
+    }
+
+    if (profile.is_admin) {
+      return {
+        isLimited: false,
+        imagesUsedThisMonth: profile.images_used_this_month || 0,
+        remainingThisMonth: ADMIN_MONTHLY_LIMIT,
+      };
     }
 
     // Check if we need to reset monthly counter
@@ -112,11 +121,11 @@ export async function getUserSubscriptionStatus(
   try {
     const { data: profile } = await supabase
       .from("user_profiles")
-      .select("subscription_tier")
+      .select("subscription_tier, is_admin")
       .eq("id", userId)
       .single();
 
-    return profile?.subscription_tier || "free";
+    return profile?.is_admin ? "premium" : profile?.subscription_tier || "free";
   } catch (error) {
     console.error("Error getting subscription status:", error);
     return "free";

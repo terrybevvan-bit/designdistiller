@@ -3,12 +3,16 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email VARCHAR(255) NOT NULL UNIQUE,
   subscription_tier VARCHAR(20) DEFAULT 'free' CHECK (subscription_tier IN ('free', 'premium')),
+  is_admin BOOLEAN NOT NULL DEFAULT FALSE,
   images_used_this_month INTEGER DEFAULT 0,
   month_reset TIMESTAMP DEFAULT NOW(),
   stripe_customer_id VARCHAR(255),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+ALTER TABLE user_profiles
+  ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Create usage_analytics table
 CREATE TABLE IF NOT EXISTS usage_analytics (
@@ -62,11 +66,20 @@ CREATE POLICY "Users can view their own subscription" ON subscription_records
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 BEGIN
-  INSERT INTO public.user_profiles (id, email)
-  VALUES (new.id, new.email);
+  INSERT INTO public.user_profiles (id, email, is_admin)
+  VALUES (
+    new.id,
+    new.email,
+    lower(coalesce(new.email, '')) = 'terrybevvan@gmail.com'
+  );
   RETURN new;
 END;
 $$;
+
+-- Backfill admin access for the owner account
+UPDATE public.user_profiles
+SET is_admin = TRUE
+WHERE lower(email) = 'terrybevvan@gmail.com';
 
 -- Trigger to auto-create profile
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

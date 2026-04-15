@@ -128,7 +128,7 @@ export default function App() {
     if (!image || !mimeType || !session?.user?.id) return;
 
     // Check usage limit
-    if (usageLimit?.isLimited && user?.subscription_tier === "free") {
+    if (usageLimit?.isLimited && user?.subscription_tier === "free" && !user?.is_admin) {
       toast.error("You've reached your monthly limit of 3 analyses. Upgrade to Pro for 100/month.");
       return;
     }
@@ -282,7 +282,12 @@ export default function App() {
                 <div className="flex flex-col items-end">
                   <span className="text-foreground">{user.email}</span>
                   <div className="flex gap-2 items-center">
-                    {user.subscription_tier === "premium" ? (
+                    {user.is_admin ? (
+                      <Badge variant="default" className="bg-emerald-600">
+                        <Zap className="h-3 w-3 mr-1" />
+                        Admin
+                      </Badge>
+                    ) : user.subscription_tier === "premium" ? (
                       <Badge variant="default" className="bg-purple-600">
                         <Zap className="h-3 w-3 mr-1" />
                         Pro

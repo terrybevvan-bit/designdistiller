@@ -232,7 +232,7 @@ export async function checkUsageLimit(userId) {
   const supabase = getSupabase();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("images_used_this_month, month_reset, subscription_tier")
+    .select("images_used_this_month, month_reset, subscription_tier, is_admin")
     .eq("id", userId)
     .single();
 
@@ -242,6 +242,15 @@ export async function checkUsageLimit(userId) {
       remaining: 0,
       limit: 0,
       message: "User profile not found",
+    };
+  }
+
+  if (profile.is_admin) {
+    return {
+      allowed: true,
+      remaining: null,
+      limit: null,
+      message: "Admin access: unlimited analyses",
     };
   }
 
@@ -277,9 +286,13 @@ export async function incrementUsageCount(userId) {
   const supabase = getSupabase();
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("images_used_this_month")
+    .select("images_used_this_month, is_admin")
     .eq("id", userId)
     .single();
+
+  if (profile?.is_admin) {
+    return;
+  }
 
   if (profile) {
     await supabase

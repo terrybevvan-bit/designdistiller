@@ -64,7 +64,7 @@ export default async function handler(req, res) {
     return sendJson(res, 200, {
       success: true,
       analysis,
-      remaining: limitCheck.remaining - 1,
+      remaining: limitCheck.remaining == null ? null : limitCheck.remaining - 1,
     });
   } catch (error) {
     console.error("[api/analyze] failed", error);

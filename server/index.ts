@@ -136,11 +136,11 @@ function parseResponse(text: string) {
 // Check usage limit
 async function checkUsageLimit(
   userId: string
-): Promise<{ allowed: boolean; remaining: number; limit: number; message: string }> {
+): Promise<{ allowed: boolean; remaining: number | null; limit: number | null; message: string }> {
   try {
     const { data: profile } = await supabase
       .from("user_profiles")
-      .select("images_used_this_month, month_reset, subscription_tier")
+      .select("images_used_this_month, month_reset, subscription_tier, is_admin")
       .eq("id", userId)
       .single();
 
@@ -150,6 +150,15 @@ async function checkUsageLimit(
         remaining: 0,
         limit: 0,
         message: "User profile not found",
+      };
+    }
+
+    if (profile.is_admin) {
+      return {
+        allowed: true,
+        remaining: null,
+        limit: null,
+        message: "Admin access: unlimited analyses",
       };
     }
 
@@ -198,9 +207,13 @@ async function incrementUsageCount(userId: string): Promise<void> {
   try {
     const { data: profile } = await supabase
       .from("user_profiles")
-      .select("images_used_this_month")
+      .select("images_used_this_month, is_admin")
       .eq("id", userId)
       .single();
+
+    if (profile?.is_admin) {
+      return;
+    }
 
     if (profile) {
       await supabase
@@ -305,7 +318,7 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
     res.json({
       success: true,
       analysis: analysisResult,
-      remaining: limitCheck.remaining === -1 ? null : limitCheck.remaining - 1,
+      remaining: limitCheck.remaining == null ? null : limitCheck.remaining - 1,
     });
   } catch (error: any) {
     console.error("Error analyzing image:", error);

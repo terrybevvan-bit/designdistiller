@@ -15,8 +15,9 @@ export interface UserProfile {
   id: string;
   email: string;
   subscription_tier: "free" | "premium";
-  images_used_today: number;
-  last_reset: string;
+  is_admin: boolean;
+  images_used_this_month: number;
+  month_reset: string;
   stripe_customer_id?: string;
   created_at: string;
 }

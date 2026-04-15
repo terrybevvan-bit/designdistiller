@@ -15,7 +15,8 @@ This guide reflects the current Vercel deployment model for DesignDistiller.
 1. Create a Supabase project.
 2. Open the SQL editor.
 3. Run [`schema.sql`](./schema.sql).
-4. Copy:
+4. If the database already existed before the admin flag was added, also run [`ADMIN_ACCESS.sql`](./ADMIN_ACCESS.sql).
+5. Copy:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
 
