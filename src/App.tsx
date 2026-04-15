@@ -7,7 +7,7 @@ import {
   Copy, 
   Check, 
   Loader2, 
-  RefreshCw,
+  Pencil,
   FileImage, 
   FileCode, 
   FileJson,
@@ -56,6 +56,7 @@ export default function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [editablePrompts, setEditablePrompts] = useState({ png: "", svg: "" });
+  const [activeEditor, setActiveEditor] = useState<"png" | "svg" | null>(null);
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,6 +68,8 @@ export default function App() {
   const hasAppliedSelectedPlan = useRef(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pngPromptRef = useRef<HTMLTextAreaElement>(null);
+  const svgPromptRef = useRef<HTMLTextAreaElement>(null);
 
   // Avoid hydration mismatch
   React.useEffect(() => {
@@ -105,6 +108,7 @@ export default function App() {
       png: result?.pngPrompt || "",
       svg: result?.svgPrompt || "",
     });
+    setActiveEditor(null);
   }, [result]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,6 +210,7 @@ export default function App() {
     setIsGenerating(false);
     setUserInstruction("");
     setEditablePrompts({ png: "", svg: "" });
+    setActiveEditor(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -297,6 +302,17 @@ export default function App() {
       ...current,
       [field]: value,
     }));
+  };
+
+  const activateEditor = (field: "png" | "svg") => {
+    setActiveEditor(field);
+
+    window.requestAnimationFrame(() => {
+      const target = field === "png" ? pngPromptRef.current : svgPromptRef.current;
+      target?.focus();
+      const end = target?.value.length ?? 0;
+      target?.setSelectionRange(end, end);
+    });
   };
 
   return (
@@ -590,23 +606,36 @@ export default function App() {
                         <CardContent className="p-0">
                           <div className="flex items-center justify-between border-b px-4 py-3">
                             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">High-Resolution Artwork</span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => copyToClipboard(editablePrompts.png, 'png')}
-                              className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 text-[10px] sm:text-xs"
-                            >
-                              {copiedField === 'png' ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
-                              <span className="hidden sm:inline">{copiedField === 'png' ? 'Copied' : 'Copy Prompt'}</span>
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant={activeEditor === "png" ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => activateEditor("png")}
+                                className={`h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-[10px] sm:text-xs ${activeEditor === "png" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700"}`}
+                              >
+                                <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>{activeEditor === "png" ? "Editing" : "Edit"}</span>
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => copyToClipboard(editablePrompts.png, 'png')}
+                                className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 text-[10px] sm:text-xs"
+                              >
+                                {copiedField === 'png' ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                <span className="hidden sm:inline">{copiedField === 'png' ? 'Copied' : 'Copy Prompt'}</span>
+                              </Button>
+                            </div>
                           </div>
-                          <ScrollArea className="h-[200px] w-full p-4">
+                          <div className="p-4">
                             <textarea
+                              ref={pngPromptRef}
                               value={editablePrompts.png}
                               onChange={(e) => updateEditablePrompt("png", e.target.value)}
-                              className="min-h-[168px] w-full resize-none rounded-lg border bg-background px-3 py-3 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-indigo-500"
+                              onFocus={() => setActiveEditor("png")}
+                              className={`min-h-[168px] max-h-[240px] w-full resize-y overflow-y-auto rounded-lg border bg-background px-3 py-3 text-sm leading-relaxed text-foreground outline-none transition-colors ${activeEditor === "png" ? "border-indigo-500 ring-2 ring-indigo-500/20" : "border-border"}`}
                             />
-                          </ScrollArea>
+                          </div>
                         </CardContent>
                       </Card>
                     </TabsContent>
@@ -616,23 +645,36 @@ export default function App() {
                         <CardContent className="p-0">
                           <div className="flex items-center justify-between border-b px-4 py-3">
                             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">Vector-Friendly Logic</span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => copyToClipboard(editablePrompts.svg, 'svg')}
-                              className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 text-[10px] sm:text-xs"
-                            >
-                              {copiedField === 'svg' ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
-                              <span className="hidden sm:inline">{copiedField === 'svg' ? 'Copied' : 'Copy Prompt'}</span>
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant={activeEditor === "svg" ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => activateEditor("svg")}
+                                className={`h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-[10px] sm:text-xs ${activeEditor === "svg" ? "bg-indigo-600 text-white hover:bg-indigo-700" : "text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700"}`}
+                              >
+                                <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>{activeEditor === "svg" ? "Editing" : "Edit"}</span>
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => copyToClipboard(editablePrompts.svg, 'svg')}
+                                className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 text-[10px] sm:text-xs"
+                              >
+                                {copiedField === 'svg' ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                <span className="hidden sm:inline">{copiedField === 'svg' ? 'Copied' : 'Copy Prompt'}</span>
+                              </Button>
+                            </div>
                           </div>
-                          <ScrollArea className="h-[200px] w-full p-4">
+                          <div className="p-4">
                             <textarea
+                              ref={svgPromptRef}
                               value={editablePrompts.svg}
                               onChange={(e) => updateEditablePrompt("svg", e.target.value)}
-                              className="min-h-[168px] w-full resize-none rounded-lg border bg-background px-3 py-3 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-indigo-500"
+                              onFocus={() => setActiveEditor("svg")}
+                              className={`min-h-[168px] max-h-[240px] w-full resize-y overflow-y-auto rounded-lg border bg-background px-3 py-3 text-sm leading-relaxed text-foreground outline-none transition-colors ${activeEditor === "svg" ? "border-indigo-500 ring-2 ring-indigo-500/20" : "border-border"}`}
                             />
-                          </ScrollArea>
+                          </div>
                         </CardContent>
                       </Card>
                     </TabsContent>
