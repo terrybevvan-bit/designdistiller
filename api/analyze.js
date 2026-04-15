@@ -2,6 +2,7 @@ import {
   SYSTEM_PROMPT,
   checkUsageLimit,
   getGemini,
+  getSupabase,
   incrementUsageCount,
   parseResponse,
   readJsonBody,
