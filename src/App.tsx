@@ -55,6 +55,7 @@ export default function App() {
   const [mimeType, setMimeType] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [editablePrompts, setEditablePrompts] = useState({ png: "", svg: "" });
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -98,6 +99,13 @@ export default function App() {
 
     hasAppliedSelectedPlan.current = true;
   }, [session?.user?.id]);
+
+  React.useEffect(() => {
+    setEditablePrompts({
+      png: result?.pngPrompt || "",
+      svg: result?.svgPrompt || "",
+    });
+  }, [result]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -197,6 +205,7 @@ export default function App() {
     setIsAnalyzing(false);
     setIsGenerating(false);
     setUserInstruction("");
+    setEditablePrompts({ png: "", svg: "" });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -281,6 +290,13 @@ export default function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const updateEditablePrompt = (field: "png" | "svg", value: string) => {
+    setEditablePrompts((current) => ({
+      ...current,
+      [field]: value,
+    }));
   };
 
   return (
@@ -577,7 +593,7 @@ export default function App() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={() => copyToClipboard(result.pngPrompt, 'png')}
+                              onClick={() => copyToClipboard(editablePrompts.png, 'png')}
                               className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 text-[10px] sm:text-xs"
                             >
                               {copiedField === 'png' ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
@@ -585,9 +601,11 @@ export default function App() {
                             </Button>
                           </div>
                           <ScrollArea className="h-[200px] w-full p-4">
-                            <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-                              {result.pngPrompt}
-                            </p>
+                            <textarea
+                              value={editablePrompts.png}
+                              onChange={(e) => updateEditablePrompt("png", e.target.value)}
+                              className="min-h-[168px] w-full resize-none rounded-lg border bg-background px-3 py-3 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-indigo-500"
+                            />
                           </ScrollArea>
                         </CardContent>
                       </Card>
@@ -601,7 +619,7 @@ export default function App() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              onClick={() => copyToClipboard(result.svgPrompt, 'svg')}
+                              onClick={() => copyToClipboard(editablePrompts.svg, 'svg')}
                               className="h-7 sm:h-8 px-2 sm:px-3 gap-1 sm:gap-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-700 text-[10px] sm:text-xs"
                             >
                               {copiedField === 'svg' ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
@@ -609,9 +627,11 @@ export default function App() {
                             </Button>
                           </div>
                           <ScrollArea className="h-[200px] w-full p-4">
-                            <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-                              {result.svgPrompt}
-                            </p>
+                            <textarea
+                              value={editablePrompts.svg}
+                              onChange={(e) => updateEditablePrompt("svg", e.target.value)}
+                              className="min-h-[168px] w-full resize-none rounded-lg border bg-background px-3 py-3 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-indigo-500"
+                            />
                           </ScrollArea>
                         </CardContent>
                       </Card>
@@ -698,16 +718,16 @@ export default function App() {
                     <CardContent className="p-6 space-y-4">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Button 
-                          onClick={() => handleGenerateImage(result.pngPrompt)}
-                          disabled={isGenerating}
+                          onClick={() => handleGenerateImage(editablePrompts.png)}
+                          disabled={isGenerating || !editablePrompts.png.trim()}
                           className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                         >
                           {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileImage className="mr-2 h-4 w-4" />}
                           Replicate PNG Style
                         </Button>
                         <Button 
-                          onClick={() => handleGenerateImage(result.svgPrompt)}
-                          disabled={isGenerating}
+                          onClick={() => handleGenerateImage(editablePrompts.svg)}
+                          disabled={isGenerating || !editablePrompts.svg.trim()}
                           variant="outline"
                           className="flex-1 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
                         >
