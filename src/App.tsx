@@ -539,7 +539,12 @@ export default function App() {
 
           {/* Right Column: Analysis Results */}
           <div className="space-y-6">
-            <h2 className="mb-4 text-2xl font-bold tracking-tight">Extracted Artwork</h2>
+            <div className="mb-4 space-y-1">
+              <h2 className="text-2xl font-bold tracking-tight">Extracted Detailed Prompt</h2>
+              <p className="text-sm text-muted-foreground">
+                This section turns your uploaded design into a detailed editable prompt you can refine before generating artwork.
+              </p>
+            </div>
             
             <AnimatePresence mode="wait">
               {isAnalyzing ? (
