@@ -8,6 +8,13 @@ export function LandingPage() {
   const { signInWithGoogle, session } = useAuth();
   const navigate = useNavigate();
 
+  const scrollToLearnMore = () => {
+    document.getElementById("learn-more")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   if (session) {
     navigate("/dashboard");
     return null;
@@ -124,6 +131,7 @@ export function LandingPage() {
             <Button
               size="lg"
               variant="outline"
+              onClick={scrollToLearnMore}
               className="border-purple-500 text-purple-400 hover:bg-purple-500/10"
             >
               Learn More
@@ -154,7 +162,10 @@ export function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-purple-950/20">
+      <section
+        id="learn-more"
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-black to-purple-950/20"
+      >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-16">
             What You Get
