@@ -56,7 +56,8 @@ export async function analyzeImage(
 export async function recreateArtworkFromImage(
   base64Image: string,
   mimeType: string,
-  stylePrompt: string
+  stylePrompt: string,
+  userInstruction?: string
 ): Promise<string> {
   const response = await fetch(`${getApiBaseUrl()}/api/generate`, {
     method: "POST",
@@ -67,6 +68,7 @@ export async function recreateArtworkFromImage(
       image: base64Image,
       mimeType,
       stylePrompt,
+      userInstruction,
     }),
   });
 

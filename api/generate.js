@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { image, mimeType, stylePrompt } = await readJsonBody(req);
+    const { image, mimeType, stylePrompt, userInstruction } = await readJsonBody(req);
 
     if (!image || !mimeType || !stylePrompt) {
       return sendJson(res, 400, {
@@ -27,13 +27,19 @@ export default async function handler(req, res) {
             },
           },
           {
-            text: `Replicate the design from this image as closely as possible, but remove all mockups, tumblers, mugs, shirts, frames, backgrounds, hands, and product photography elements.
+            text: `Use the uploaded image only as a structural reference for layout, density, spacing, and visual style.
 
-Isolate the central artwork concept and render it as a clean, high-resolution standalone design on a solid white background.
+The final output must follow the style guidance below exactly, even when it changes the subject matter from the source image. If the style guidance says oranges, do not generate apples. If the style guidance changes colors, objects, or motifs, follow the style guidance rather than the source photo.
 
-Preserve the original colors, style, and composition of the artwork itself.
+Remove all mockups, tumblers, mugs, shirts, frames, backgrounds, hands, and product photography elements.
 
-Style guidance: ${stylePrompt}`,
+Generate a clean, high-resolution standalone artwork. The artwork must fill the entire canvas area with no large empty margins, no small centered composition, and no isolated design floating inside a larger blank square. Extend the design edge-to-edge across the full output frame.
+
+If the requested result is a repeating pattern, make it a dense all-over pattern that covers the full canvas uniformly from edge to edge. Do not leave a border or unused whitespace around the design.
+
+User edit instruction: ${userInstruction?.trim() || "None provided."}
+
+Style guidance to follow exactly: ${stylePrompt}`,
           },
         ],
       },

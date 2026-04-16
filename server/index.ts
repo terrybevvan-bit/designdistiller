@@ -349,6 +349,70 @@ app.post("/api/analyze", async (req: Request, res: Response) => {
   }
 });
 
+// Generate recreated artwork endpoint
+app.post("/api/generate", async (req: Request, res: Response) => {
+  try {
+    const { image, mimeType, stylePrompt, userInstruction } = req.body;
+
+    if (!image || !mimeType || !stylePrompt) {
+      return res.status(400).json({
+        error: "Missing required fields: image, mimeType, stylePrompt",
+      });
+    }
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash-image",
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: image.split(",")[1] || image,
+              mimeType,
+            },
+          },
+          {
+            text: `Use the uploaded image only as a structural reference for layout, density, spacing, and visual style.
+
+The final output must follow the style guidance below exactly, even when it changes the subject matter from the source image. If the style guidance says oranges, do not generate apples. If the style guidance changes colors, objects, or motifs, follow the style guidance rather than the source photo.
+
+Remove all mockups, tumblers, mugs, shirts, frames, backgrounds, hands, and product photography elements.
+
+Generate a clean, high-resolution standalone artwork. The artwork must fill the entire canvas area with no large empty margins, no small centered composition, and no isolated design floating inside a larger blank square. Extend the design edge-to-edge across the full output frame.
+
+If the requested result is a repeating pattern, make it a dense all-over pattern that covers the full canvas uniformly from edge to edge. Do not leave a border or unused whitespace around the design.
+
+User edit instruction: ${userInstruction?.trim() || "None provided."}
+
+Style guidance to follow exactly: ${stylePrompt}`,
+          },
+        ],
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: "1:1",
+        },
+      },
+    });
+
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if ((part as any).inlineData?.data) {
+        return res.json({
+          success: true,
+          image: `data:image/png;base64,${(part as any).inlineData.data}`,
+        });
+      }
+    }
+
+    return res.status(500).json({ error: "No image generated" });
+  } catch (error: any) {
+    console.error("Error generating image:", error);
+    res.status(500).json({
+      error: "Failed to generate image",
+      message: error?.message || "Unknown error",
+    });
+  }
+});
+
 // Checkout endpoint
 app.post("/api/checkout", async (req: Request, res: Response) => {
   try {

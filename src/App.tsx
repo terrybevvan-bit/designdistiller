@@ -276,7 +276,7 @@ export default function App() {
     setIsGenerating(true);
     setGeneratedImage(null);
     try {
-      const img = await recreateArtworkFromImage(image, mimeType, prompt);
+      const img = await recreateArtworkFromImage(image, mimeType, prompt, userInstruction);
       setGeneratedImage(img);
       toast.success("Artwork recreated successfully!");
     } catch (error) {
