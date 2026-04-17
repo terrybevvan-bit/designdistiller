@@ -4,10 +4,6 @@ import {
   Sparkles,
   ArrowRight,
   Check,
-  ImageUp,
-  Wand2,
-  FileImage,
-  FileCode2,
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -57,30 +53,24 @@ export function LandingPage() {
     "Use the output for print-on-demand design workflows, production art cleanup, and faster creative iteration.",
   ];
 
-  const workflow = [
+  const visualFlow = [
     {
-      icon: ImageUp,
-      title: "Upload a mockup or product image",
+      title: "Upload the reference image",
       description:
-        "Start with a shirt mockup, tumbler listing, mug photo, or other product image that contains artwork you want to extract and reinterpret.",
+        "Start with a product photo, listing image, mockup, or design screenshot that contains the artwork you want to isolate.",
+      image: "/ForCodex/preview3.webp",
     },
     {
-      icon: Wand2,
-      title: "Extract the hidden design concept",
+      title: "Extract the design prompt",
       description:
-        "DesignDistiller analyzes the image, separates the printable artwork from the product, and summarizes the real design underneath the mockup.",
+        "DesignDistiller breaks out the design summary, PNG prompt, SVG prompt, and negative prompt so you can work from clean production guidance.",
+      image: "/ForCodex/preview1.webp",
     },
     {
-      icon: FileImage,
-      title: "Get print-ready PNG prompt output",
+      title: "Generate the clean standalone artwork",
       description:
-        "Receive a detailed PNG-focused prompt for high-resolution artwork generation, transparent-background output, and commercial print workflows.",
-    },
-    {
-      icon: FileCode2,
-      title: "Get SVG-friendly vector guidance",
-      description:
-        "Receive a matching SVG prompt when the design is appropriate for vector recreation, Cricut cutting files, or simplified scalable artwork.",
+        "Use the extracted prompt to replicate the art into a cleaner print-ready image, ready for download or further refinement.",
+      image: "/ForCodex/preview2.webp",
     },
   ];
 
@@ -214,7 +204,7 @@ export function LandingPage() {
           transition={{ duration: 0.8 }}
           className="relative mx-auto max-w-6xl"
         >
-          <div className="grid items-center gap-14 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
                 <ShieldCheck className="h-4 w-4" />
@@ -258,33 +248,19 @@ export function LandingPage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/30">
-              <div className="rounded-[1.5rem] border border-indigo-400/20 bg-stone-900/80 p-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-sm font-medium uppercase tracking-[0.2em] text-indigo-300">Workflow</span>
-                  <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
-                    Built for creators
-                  </span>
-                </div>
-                <div className="space-y-5">
-                  {workflow.map((step, index) => {
-                    const Icon = step.icon;
-                    return (
-                      <div key={step.title} className="flex gap-4 rounded-2xl border border-white/8 bg-white/4 p-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-300">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold uppercase tracking-wider text-stone-400">
-                            Step {index + 1}
-                          </p>
-                          <h2 className="mt-1 text-lg font-semibold text-white">{step.title}</h2>
-                          <p className="mt-2 text-sm leading-6 text-stone-300">{step.description}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/30">
+              <div className="mb-4 flex items-center justify-between px-2">
+                <span className="text-sm font-medium uppercase tracking-[0.2em] text-indigo-300">Live workflow preview</span>
+                <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
+                  Upload → extract → recreate
+                </span>
+              </div>
+              <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-stone-950">
+                <img
+                  src="/ForCodex/preview3.webp"
+                  alt="DesignDistiller dashboard showing a reference image upload and extracted prompt layout"
+                  className="h-auto w-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -296,11 +272,11 @@ export function LandingPage() {
         className="border-y border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(99,102,241,0.08))] px-4 py-20 sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300">What DesignDistiller does</p>
               <h2 className="mt-4 text-4xl font-bold tracking-tight text-white">
-                A clearer landing page for what this AI design tool actually solves
+                See the workflow from mockup to extracted design output
               </h2>
               <p className="mt-6 text-lg leading-8 text-stone-300">
                 DesignDistiller is not a mockup maker. It is a design extraction tool for creators who already have
@@ -309,20 +285,53 @@ export function LandingPage() {
                 for print-on-demand, creative ideation, and production cleanup.
               </p>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {useCases.map((item, index) => (
+            <div className="space-y-5">
+              {visualFlow.map((item, index) => (
                 <motion.div
-                  key={item}
+                  key={item.title}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.08 }}
-                  className="rounded-2xl border border-white/8 bg-white/4 p-5"
+                  className="overflow-hidden rounded-3xl border border-white/8 bg-white/4"
                 >
-                  <h3 className="text-lg font-semibold text-white">Use Case {index + 1}</h3>
-                  <p className="mt-3 text-sm leading-6 text-stone-300">{item}</p>
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-auto w-full object-cover"
+                  />
+                  <div className="p-5">
+                    <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-300">Step {index + 1}</p>
+                    <h3 className="mt-2 text-xl font-semibold text-white">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-stone-300">{item.description}</p>
+                  </div>
                 </motion.div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-14 max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300">Use cases</p>
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-white">
+              Built for sellers, designers, and print production workflows
+            </h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {useCases.map((item, index) => (
+              <motion.div
+                key={item}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08 }}
+                className="rounded-2xl border border-white/8 bg-white/4 p-5"
+              >
+                <h3 className="text-lg font-semibold text-white">Use Case {index + 1}</h3>
+                <p className="mt-3 text-sm leading-6 text-stone-300">{item}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
