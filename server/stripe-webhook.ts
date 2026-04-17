@@ -32,7 +32,7 @@ export async function createCheckoutSession(
   userEmail: string,
   plan: "weekly" | "monthly" = "monthly",
   appUrl?: string
-): Promise<string> {
+): Promise<{ sessionId: string; checkoutUrl: string }> {
   try {
     const priceId =
       plan === "weekly"
@@ -73,7 +73,14 @@ export async function createCheckoutSession(
       },
     });
 
-    return session.id;
+    if (!session.url) {
+      throw new Error("Stripe did not return a checkout URL");
+    }
+
+    return {
+      sessionId: session.id,
+      checkoutUrl: session.url,
+    };
   } catch (error) {
     console.error("Error creating checkout session:", error);
     throw error;

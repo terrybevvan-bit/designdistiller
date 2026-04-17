@@ -59,7 +59,15 @@ export default async function handler(req, res) {
       },
     });
 
-    return sendJson(res, 200, { success: true, sessionId: session.id });
+    if (!session.url) {
+      throw new Error("Stripe did not return a checkout URL");
+    }
+
+    return sendJson(res, 200, {
+      success: true,
+      sessionId: session.id,
+      checkoutUrl: session.url,
+    });
   } catch (error) {
     console.error("[api/checkout] failed", error);
     return sendJson(res, 500, {

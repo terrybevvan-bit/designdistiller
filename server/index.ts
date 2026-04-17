@@ -429,13 +429,13 @@ app.post("/api/checkout", async (req: Request, res: Response) => {
       ? forwardedProtoHeader[0]
       : forwardedProtoHeader;
     const requestOrigin = `${forwardedProto || req.protocol}://${req.get("host")}`;
-    const sessionId = await createCheckoutSession(
+    const checkoutSession = await createCheckoutSession(
       userId,
       userEmail,
       plan === "weekly" ? "weekly" : "monthly",
       requestOrigin
     );
-    res.json({ sessionId, success: true });
+    res.json({ ...checkoutSession, success: true });
   } catch (error: any) {
     console.error("Error creating checkout session:", error);
     res.status(500).json({

@@ -240,24 +240,12 @@ export default function App() {
         throw new Error(data?.message || data?.error || `Checkout failed: ${response.statusText}`);
       }
 
-      const { sessionId } = data ?? {};
-      if (!sessionId) {
-        throw new Error("No session ID returned from checkout");
+      const { checkoutUrl } = data ?? {};
+      if (!checkoutUrl) {
+        throw new Error("No checkout URL returned from checkout");
       }
 
-      // Redirect to Stripe Checkout
-      const stripeClient: any = await import("@stripe/stripe-js").then((m) =>
-        m.loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
-      );
-
-      if (!stripeClient) {
-        throw new Error("Failed to load Stripe");
-      }
-
-      const redirectResult = await stripeClient.redirectToCheckout({ sessionId });
-      if (redirectResult?.error) {
-        throw new Error(redirectResult.error.message || "Stripe redirect failed");
-      }
+      window.location.assign(checkoutUrl);
     } catch (error) {
       console.error("Error starting checkout:", error);
       toast.error(error instanceof Error ? error.message : "Failed to start checkout. Please try again.");
