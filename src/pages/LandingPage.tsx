@@ -75,7 +75,7 @@ export function LandingPage() {
     {
       title: "Refine the extracted output for production",
       description:
-        "Edit the prompt before generating the cleaned result.",
+        "Edit the prompt, then take it into your preferred image generator for the cleaned result.",
       image: "/landing/step4.jpg",
     },
     {
