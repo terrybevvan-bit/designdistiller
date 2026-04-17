@@ -58,31 +58,31 @@ export function LandingPage() {
       title: "Start with a clean dashboard and upload flow",
       description:
         "Open the tool and prepare a reference image for extraction.",
-      image: "/ForCodex/Step1.jpg",
+      image: "/landing/step1.jpg",
     },
     {
       title: "Drop in the product image or design reference",
       description:
         "Use a shirt graphic, tumbler design, listing image, or mockup.",
-      image: "/ForCodex/Step2.jpg",
+      image: "/landing/step2.jpg",
     },
     {
       title: "Generate the extracted design summary and prompt set",
       description:
         "Get the summary, PNG prompt, SVG prompt, and negative prompt.",
-      image: "/ForCodex/Step3.jpg",
+      image: "/landing/step3.jpg",
     },
     {
       title: "Refine the extracted output for production",
       description:
         "Edit the prompt before generating the cleaned result.",
-      image: "/ForCodex/Step4.jpg",
+      image: "/landing/step4.jpg",
     },
     {
       title: "Recreate the standalone printable artwork",
       description:
         "Generate a cleaner, more print-ready standalone artwork file.",
-      image: "/ForCodex/step5.jpg",
+      image: "/landing/step5.jpg",
     },
   ];
 
@@ -262,12 +262,12 @@ export function LandingPage() {
               <div className="mb-4 flex items-center justify-between px-2">
                 <span className="text-sm font-medium uppercase tracking-[0.2em] text-indigo-300">Live workflow preview</span>
                 <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
-                  Upload → extract → recreate
+                  Upload {"->"} extract {"->"} recreate
                 </span>
               </div>
               <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-stone-950">
                 <img
-                  src="/ForCodex/preview3.webp"
+                  src="/landing/preview3.webp"
                   alt="DesignDistiller dashboard showing a reference image upload and extracted prompt layout"
                   className="h-auto w-full object-cover"
                 />
@@ -294,7 +294,7 @@ export function LandingPage() {
             </div>
             <div className="rounded-3xl border border-white/8 bg-white/4 p-5">
               <img
-                src="/ForCodex/Step3.jpg"
+                src="/landing/step3.jpg"
                 alt="DesignDistiller showing the extracted prompt workflow after analyzing a product image"
                 className="h-auto w-full rounded-2xl border border-white/8 object-cover"
               />
