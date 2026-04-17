@@ -454,6 +454,56 @@ app.post("/api/checkout", async (req: Request, res: Response) => {
   }
 });
 
+app.post("/api/customer-portal", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        error: "Missing required field: userId",
+      });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("user_profiles")
+      .select("stripe_customer_id, subscription_tier")
+      .eq("id", userId)
+      .single();
+
+    if (profileError) {
+      throw profileError;
+    }
+
+    if (!profile?.stripe_customer_id) {
+      return res.status(400).json({
+        error: "No Stripe customer found for this user",
+      });
+    }
+
+    const forwardedProtoHeader = req.headers["x-forwarded-proto"];
+    const forwardedProto = Array.isArray(forwardedProtoHeader)
+      ? forwardedProtoHeader[0]
+      : forwardedProtoHeader;
+    const requestOrigin = `${forwardedProto || req.protocol}://${req.get("host")}`;
+    const session = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${requestOrigin}/dashboard`,
+    });
+
+    res.json({
+      success: true,
+      portalUrl: session.url,
+      subscriptionTier: profile.subscription_tier,
+    });
+  } catch (error: any) {
+    console.error("Error creating customer portal session:", error);
+    res.status(500).json({
+      error: "Failed to create customer portal session",
+      message: error?.message || "Unknown error",
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`✅ DesignDistiller API running on http://localhost:${PORT}`);

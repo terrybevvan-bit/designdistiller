@@ -60,6 +60,7 @@ export default function App() {
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [usageLimit, setUsageLimit] = useState<{ isLimited: boolean; remainingThisPeriod: number; imagesUsedThisPeriod: number } | null>(null);
@@ -252,6 +253,46 @@ export default function App() {
     }
   };
 
+  const handleManageSubscriptionClick = async () => {
+    if (!user?.id || !session?.access_token) {
+      toast.error("Please log in to manage your subscription");
+      return;
+    }
+
+    setIsOpeningPortal(true);
+
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/customer-portal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Portal failed: ${response.statusText}`);
+      }
+
+      const { portalUrl } = data ?? {};
+      if (!portalUrl) {
+        throw new Error("No billing portal URL returned");
+      }
+
+      window.location.assign(portalUrl);
+    } catch (error) {
+      console.error("Error opening customer portal:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to open subscription management.");
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
+
   const downloadJson = () => {
     if (!result) return;
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(result, null, 2));
@@ -335,15 +376,37 @@ export default function App() {
                         Admin
                       </Badge>
                     ) : user.subscription_tier === "monthly" || user.subscription_tier === "premium" ? (
-                      <Badge variant="default" className="bg-purple-600">
-                        <Zap className="h-3 w-3 mr-1" />
-                        Monthly
-                      </Badge>
+                      <>
+                        <Badge variant="default" className="bg-purple-600">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Monthly
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleManageSubscriptionClick}
+                          disabled={isOpeningPortal}
+                          className="text-xs"
+                        >
+                          {isOpeningPortal ? "Opening..." : "Manage"}
+                        </Button>
+                      </>
                     ) : user.subscription_tier === "weekly" ? (
-                      <Badge variant="default" className="bg-amber-600">
-                        <Zap className="h-3 w-3 mr-1" />
-                        Weekly
-                      </Badge>
+                      <>
+                        <Badge variant="default" className="bg-amber-600">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Weekly
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleManageSubscriptionClick}
+                          disabled={isOpeningPortal}
+                          className="text-xs"
+                        >
+                          {isOpeningPortal ? "Opening..." : "Manage"}
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Badge variant="outline">
