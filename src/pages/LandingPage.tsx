@@ -47,41 +47,41 @@ export function LandingPage() {
   }
 
   const coreBenefits = [
-    "Upload a product mockup, shirt image, tumbler photo, or listing image and isolate the actual artwork concept.",
-    "Generate keyword-rich PNG prompts for AI image generation and SVG prompts for vector-friendly recreation.",
-    "Remove product photography, shadows, props, mockups, and background clutter from the design analysis.",
-    "Use the output for print-on-demand design workflows, production art cleanup, and faster creative iteration.",
+    "Strip away mockups and product clutter",
+    "Generate PNG and SVG prompt output",
+    "Recreate cleaner standalone artwork",
+    "Speed up print-on-demand design workflows",
   ];
 
   const visualPipeline = [
     {
       title: "Start with a clean dashboard and upload flow",
       description:
-        "Users land inside the app, upload a product mockup or listing image, and prepare the reference artwork for extraction.",
+        "Open the tool and prepare a reference image for extraction.",
       image: "/ForCodex/Step1.jpg",
     },
     {
       title: "Drop in the product image or design reference",
       description:
-        "The pipeline starts with a shirt graphic, tumbler design, mockup, or listing image that contains artwork hidden inside the product presentation.",
+        "Use a shirt graphic, tumbler design, listing image, or mockup.",
       image: "/ForCodex/Step2.jpg",
     },
     {
       title: "Generate the extracted design summary and prompt set",
       description:
-        "DesignDistiller analyzes the image and returns a design summary, PNG prompt, SVG prompt, and production-ready direction for the isolated artwork.",
+        "Get the summary, PNG prompt, SVG prompt, and negative prompt.",
       image: "/ForCodex/Step3.jpg",
     },
     {
       title: "Refine the extracted output for production",
       description:
-        "Users can edit the generated prompt text, keep the visual direction they want, and improve the result before creating the cleaned artwork.",
+        "Edit the prompt before generating the cleaned result.",
       image: "/ForCodex/Step4.jpg",
     },
     {
       title: "Recreate the standalone printable artwork",
       description:
-        "The final step uses the extracted design guidance to generate a cleaner, standalone PNG-style artwork that is closer to print-ready output.",
+        "Generate a cleaner, more print-ready standalone artwork file.",
       image: "/ForCodex/step5.jpg",
     },
   ];
@@ -226,9 +226,7 @@ export function LandingPage() {
                 Design Distiller for mockup design extraction, PNG prompts, and SVG-ready artwork workflows
               </h1>
               <p className="mt-6 max-w-3xl text-lg leading-8 text-stone-300 sm:text-xl">
-                DesignDistiller helps creators extract artwork ideas from shirts, tumblers, mugs, and product mockups.
-                Upload a listing image, strip away the product photo, and generate clear print-ready prompt output for
-                PNG artwork, SVG-style recreation, and faster design iteration.
+                Upload a product mockup or listing image, isolate the real artwork, and generate cleaner PNG and SVG prompt output for print-ready design workflows.
               </p>
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -250,9 +248,9 @@ export function LandingPage() {
                 </Button>
               </div>
 
-              <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              <div className="mt-10 grid gap-3 sm:grid-cols-2">
                 {coreBenefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/4 p-4">
+                  <div key={index} className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/4 p-3">
                     <Check className="mt-0.5 h-5 w-5 shrink-0 text-indigo-400" />
                     <p className="text-sm leading-6 text-stone-200">{benefit}</p>
                   </div>
@@ -284,17 +282,14 @@ export function LandingPage() {
         className="border-y border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(99,102,241,0.08))] px-4 py-20 sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 grid gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="mb-12 grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300">What DesignDistiller does</p>
               <h2 className="mt-4 text-4xl font-bold tracking-tight text-white">
                 See the full pipeline from upload to recreated artwork
               </h2>
-              <p className="mt-6 text-lg leading-8 text-stone-300">
-                DesignDistiller is not a mockup maker. It is a design extraction tool for creators who already have
-                artwork hidden inside product photos and need cleaner, more production-ready prompt output. The goal is
-                to identify the real printable artwork, remove the product scene, and give you reusable design guidance
-                for print-on-demand, creative ideation, and production cleanup.
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-300">
+                The tool identifies the printable artwork inside product photos, removes the product context, and returns prompt output you can actually use.
               </p>
             </div>
             <div className="rounded-3xl border border-white/8 bg-white/4 p-5">
@@ -306,7 +301,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid gap-5">
             {visualPipeline.map((item, index) => (
               <motion.div
                 key={item.title}
@@ -315,10 +310,10 @@ export function LandingPage() {
                 transition={{ delay: index * 0.06 }}
                 className="grid overflow-hidden rounded-3xl border border-white/8 bg-white/4 lg:grid-cols-[1.05fr_0.95fr]"
               >
-                <div className={cn("p-6 lg:p-8", index % 2 === 1 ? "lg:order-2" : "")}>
+                <div className={cn("p-6 lg:p-7", index % 2 === 1 ? "lg:order-2" : "")}>
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-300">Step {index + 1}</p>
-                  <h3 className="mt-3 text-2xl font-semibold text-white">{item.title}</h3>
-                  <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300">{item.description}</p>
+                  <h3 className="mt-2 text-2xl font-semibold text-white">{item.title}</h3>
+                  <p className="mt-3 max-w-2xl text-base leading-7 text-stone-300">{item.description}</p>
                 </div>
                 <div className={cn("border-t border-white/8 bg-stone-950/40 p-4 lg:border-l lg:border-t-0", index % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r" : "")}>
                   <img
@@ -333,22 +328,22 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-14 max-w-3xl">
+          <div className="mb-10 max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300">Use cases</p>
             <h2 className="mt-4 text-4xl font-bold tracking-tight text-white">
               Built for sellers, designers, and print production workflows
             </h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {useCases.map((item, index) => (
               <motion.div
                 key={item}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08 }}
-                className="rounded-2xl border border-white/8 bg-white/4 p-5"
+                className="rounded-2xl border border-white/8 bg-white/4 p-4"
               >
                 <h3 className="text-lg font-semibold text-white">Use Case {index + 1}</h3>
                 <p className="mt-3 text-sm leading-6 text-stone-300">{item}</p>
@@ -438,19 +433,19 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="border-y border-white/6 bg-white/[0.03] px-4 py-20 sm:px-6 lg:px-8">
+      <section className="border-y border-white/6 bg-white/[0.03] px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-14 max-w-3xl">
+          <div className="mb-10 max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300">FAQ</p>
             <h2 className="mt-4 text-4xl font-bold tracking-tight text-white">
               Frequently asked questions about DesignDistiller
             </h2>
           </div>
-          <div className="space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
             {faqItems.map((item) => (
-              <div key={item.question} className="rounded-2xl border border-white/8 bg-white/4 p-6">
-                <h3 className="text-xl font-semibold text-white">{item.question}</h3>
-                <p className="mt-3 max-w-4xl text-base leading-7 text-stone-300">{item.answer}</p>
+              <div key={item.question} className="rounded-2xl border border-white/8 bg-white/4 p-5">
+                <h3 className="text-lg font-semibold text-white">{item.question}</h3>
+                <p className="mt-3 text-sm leading-7 text-stone-300">{item.answer}</p>
               </div>
             ))}
           </div>
