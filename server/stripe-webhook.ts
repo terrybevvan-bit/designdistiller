@@ -101,7 +101,7 @@ export async function handleStripeWebhook(
 
         if (userId && subscription.status === "active") {
           // Update user to active paid plan
-          await supabase
+          const { error } = await supabase
             .from("user_profiles")
             .update({
               subscription_tier: getSubscriptionTier(subscription),
@@ -110,6 +110,10 @@ export async function handleStripeWebhook(
               month_reset: new Date().toISOString(),
             })
             .eq("id", userId);
+
+          if (error) {
+            throw new Error(`Failed to update user profile for ${userId}: ${error.message}`);
+          }
 
           console.log(`✅ User ${userId} upgraded to premium`);
         }
@@ -122,12 +126,16 @@ export async function handleStripeWebhook(
 
         if (userId) {
           // Downgrade user back to free
-          await supabase
+          const { error } = await supabase
             .from("user_profiles")
             .update({
               subscription_tier: "free",
             })
             .eq("id", userId);
+
+          if (error) {
+            throw new Error(`Failed to downgrade user profile for ${userId}: ${error.message}`);
+          }
 
           console.log(`⬇️ User ${userId} downgraded to free`);
         }

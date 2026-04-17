@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         const userId = subscription.metadata?.userId;
 
         if (userId && subscription.status === "active") {
-          await supabase
+          const { error } = await supabase
             .from("user_profiles")
             .update({
               subscription_tier: getSubscriptionTier(subscription),
@@ -42,6 +42,10 @@ export default async function handler(req, res) {
               month_reset: new Date().toISOString(),
             })
             .eq("id", userId);
+
+          if (error) {
+            throw new Error(`Failed to update user profile for ${userId}: ${error.message}`);
+          }
         }
         break;
       }
@@ -51,12 +55,16 @@ export default async function handler(req, res) {
         const userId = subscription.metadata?.userId;
 
         if (userId) {
-          await supabase
+          const { error } = await supabase
             .from("user_profiles")
             .update({
               subscription_tier: "free",
             })
             .eq("id", userId);
+
+          if (error) {
+            throw new Error(`Failed to downgrade user profile for ${userId}: ${error.message}`);
+          }
         }
         break;
       }
