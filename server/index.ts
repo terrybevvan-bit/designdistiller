@@ -24,6 +24,11 @@ app.post(
       return res.status(400).json({ error: "Webhook secret not configured" });
     }
 
+    if (!supabaseAdmin) {
+      console.warn("SUPABASE_SERVICE_ROLE_KEY not set. Stripe webhooks cannot update subscriptions.");
+      return res.status(500).json({ error: "Supabase service role key not configured" });
+    }
+
     try {
       const event = stripe.webhooks.constructEvent(
         req.body,
@@ -31,7 +36,7 @@ app.post(
         webhookSecret
       );
 
-      await handleStripeWebhook(event, supabase);
+      await handleStripeWebhook(event, supabaseAdmin);
       res.json({ received: true });
     } catch (error: any) {
       console.error("Webhook signature verification failed:", error);
@@ -56,10 +61,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-const supabase = createClient(
-  supabaseUrl,
-  supabaseServiceRoleKey || supabaseAnonKey
-);
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseAdmin = supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey)
+  : null;
 
 // Initialize Gemini (keep API key server-side)
 const geminiApiKey = process.env.VITE_GEMINI_API_KEY;

@@ -1,4 +1,4 @@
-import { getStripe, getSupabase, readRawBody, sendJson } from "../_shared.js";
+import { getStripe, getSupabaseAdmin, readRawBody, sendJson } from "../_shared.js";
 
 function getSubscriptionTier(subscription) {
   const metadataPlan = subscription.metadata?.plan;
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
   try {
     const stripe = getStripe();
-    const supabase = getSupabase();
+    const supabase = getSupabaseAdmin();
     const rawBody = await readRawBody(req);
     const signature = req.headers["stripe-signature"];
     const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);

@@ -92,6 +92,7 @@ Do not add filler.
 Do not explain obvious things.`;
 
 let cachedSupabase;
+let cachedSupabaseAdmin;
 let cachedGemini;
 let cachedStripe;
 
@@ -107,7 +108,6 @@ export function getEnv(name, fallbackName) {
 export function getSupabase(accessToken) {
   const supabaseUrl = getEnv("VITE_SUPABASE_URL");
   const anonKey = getEnv("VITE_SUPABASE_ANON_KEY");
-  const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !anonKey) {
     throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
@@ -124,10 +124,25 @@ export function getSupabase(accessToken) {
   }
 
   if (!cachedSupabase) {
-    cachedSupabase = createClient(supabaseUrl, serviceRoleKey || anonKey);
+    cachedSupabase = createClient(supabaseUrl, anonKey);
   }
 
   return cachedSupabase;
+}
+
+export function getSupabaseAdmin() {
+  const supabaseUrl = getEnv("VITE_SUPABASE_URL");
+  const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  }
+
+  if (!cachedSupabaseAdmin) {
+    cachedSupabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+  }
+
+  return cachedSupabaseAdmin;
 }
 
 export function getGemini() {
