@@ -265,12 +265,32 @@ export function LandingPage() {
                   Upload {"->"} extract {"->"} recreate
                 </span>
               </div>
-              <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-stone-950">
-                <img
-                  src="/landing/preview3.webp"
-                  alt="DesignDistiller dashboard showing a reference image upload and extracted prompt layout"
-                  className="h-auto w-full object-cover"
-                />
+              <div className="grid gap-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="overflow-hidden rounded-[1.5rem] border border-amber-400/20 bg-stone-950">
+                    <div className="border-b border-white/10 bg-amber-500/10 px-4 py-3">
+                      <span className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200">Before</span>
+                    </div>
+                    <img
+                      src="/landing/before.png"
+                      alt="Original product mockup before the design is extracted"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="overflow-hidden rounded-[1.5rem] border border-emerald-400/20 bg-stone-950">
+                    <div className="border-b border-white/10 bg-emerald-500/10 px-4 py-3">
+                      <span className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">After</span>
+                    </div>
+                    <img
+                      src="/landing/after.png"
+                      alt="Cleaned standalone artwork created after using the extracted prompt"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <p className="px-2 text-sm leading-6 text-stone-300">
+                  Start with a product image on the left, then use the extracted prompt workflow to create the cleaner standalone result on the right.
+                </p>
               </div>
             </div>
           </div>
