@@ -14,17 +14,40 @@ function getSubscriptionTier(subscription: Stripe.Subscription): "weekly" | "mon
   return "monthly";
 }
 
+function resolveAppUrl(explicitAppUrl?: string): string {
+  if (explicitAppUrl?.startsWith("http://") || explicitAppUrl?.startsWith("https://")) {
+    return explicitAppUrl;
+  }
+
+  if (process.env.VITE_APP_URL?.startsWith("http://") || process.env.VITE_APP_URL?.startsWith("https://")) {
+    return process.env.VITE_APP_URL;
+  }
+
+  return "http://localhost:3000";
+}
+
 // Create checkout session
 export async function createCheckoutSession(
   userId: string,
   userEmail: string,
-  plan: "weekly" | "monthly" = "monthly"
+  plan: "weekly" | "monthly" = "monthly",
+  appUrl?: string
 ): Promise<string> {
   try {
     const priceId =
       plan === "weekly"
         ? process.env.STRIPE_PRICE_ID_WEEKLY || ""
         : process.env.STRIPE_PRICE_ID_MONTHLY || process.env.STRIPE_PRICE_ID_PRO || "";
+
+    if (!priceId) {
+      throw new Error(
+        plan === "weekly"
+          ? "Missing STRIPE_PRICE_ID_WEEKLY"
+          : "Missing STRIPE_PRICE_ID_MONTHLY or STRIPE_PRICE_ID_PRO"
+      );
+    }
+
+    const checkoutAppUrl = resolveAppUrl(appUrl);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -36,8 +59,8 @@ export async function createCheckoutSession(
           quantity: 1,
         },
       ],
-      success_url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.VITE_APP_URL || "http://localhost:3000"}/dashboard`,
+      success_url: `${checkoutAppUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${checkoutAppUrl}/dashboard`,
       metadata: {
         userId,
         plan,

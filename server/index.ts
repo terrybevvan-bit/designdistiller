@@ -424,7 +424,17 @@ app.post("/api/checkout", async (req: Request, res: Response) => {
       });
     }
 
-    const sessionId = await createCheckoutSession(userId, userEmail, plan === "weekly" ? "weekly" : "monthly");
+    const forwardedProtoHeader = req.headers["x-forwarded-proto"];
+    const forwardedProto = Array.isArray(forwardedProtoHeader)
+      ? forwardedProtoHeader[0]
+      : forwardedProtoHeader;
+    const requestOrigin = `${forwardedProto || req.protocol}://${req.get("host")}`;
+    const sessionId = await createCheckoutSession(
+      userId,
+      userEmail,
+      plan === "weekly" ? "weekly" : "monthly",
+      requestOrigin
+    );
     res.json({ sessionId, success: true });
   } catch (error: any) {
     console.error("Error creating checkout session:", error);

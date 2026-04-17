@@ -234,11 +234,13 @@ export default function App() {
         }),
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error(`Checkout failed: ${response.statusText}`);
+        throw new Error(data?.message || data?.error || `Checkout failed: ${response.statusText}`);
       }
 
-      const { sessionId } = await response.json();
+      const { sessionId } = data ?? {};
       if (!sessionId) {
         throw new Error("No session ID returned from checkout");
       }
@@ -252,10 +254,13 @@ export default function App() {
         throw new Error("Failed to load Stripe");
       }
 
-      await stripeClient.redirectToCheckout({ sessionId });
+      const redirectResult = await stripeClient.redirectToCheckout({ sessionId });
+      if (redirectResult?.error) {
+        throw new Error(redirectResult.error.message || "Stripe redirect failed");
+      }
     } catch (error) {
       console.error("Error starting checkout:", error);
-      toast.error("Failed to start checkout. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to start checkout. Please try again.");
     }
   };
 
