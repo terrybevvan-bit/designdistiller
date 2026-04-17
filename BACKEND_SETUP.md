@@ -44,6 +44,7 @@ Required server-side values:
 - `STRIPE_PRICE_ID_WEEKLY`
 - `STRIPE_PRICE_ID_MONTHLY`
 - `STRIPE_WEBHOOK_SECRET`
+- `SUPABASE_SERVICE_ROLE_KEY`
 - `GEMINI_API_KEY` preferred
 - `VITE_GEMINI_API_KEY` supported as a fallback for compatibility
 

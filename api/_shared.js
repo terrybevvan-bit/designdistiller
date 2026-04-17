@@ -106,14 +106,15 @@ export function getEnv(name, fallbackName) {
 
 export function getSupabase(accessToken) {
   const supabaseUrl = getEnv("VITE_SUPABASE_URL");
-  const supabaseKey = getEnv("VITE_SUPABASE_ANON_KEY");
+  const anonKey = getEnv("VITE_SUPABASE_ANON_KEY");
+  const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!supabaseUrl || !anonKey) {
     throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
   }
 
   if (accessToken) {
-    return createClient(supabaseUrl, supabaseKey, {
+    return createClient(supabaseUrl, anonKey, {
       global: {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -123,7 +124,7 @@ export function getSupabase(accessToken) {
   }
 
   if (!cachedSupabase) {
-    cachedSupabase = createClient(supabaseUrl, supabaseKey);
+    cachedSupabase = createClient(supabaseUrl, serviceRoleKey || anonKey);
   }
 
   return cachedSupabase;

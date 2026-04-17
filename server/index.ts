@@ -47,15 +47,19 @@ app.use(express.urlencoded({ limit: "50mb" }));
 
 // Initialize Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
     "Missing Supabase environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)"
   );
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+  supabaseUrl,
+  supabaseServiceRoleKey || supabaseAnonKey
+);
 
 // Initialize Gemini (keep API key server-side)
 const geminiApiKey = process.env.VITE_GEMINI_API_KEY;
