@@ -53,24 +53,36 @@ export function LandingPage() {
     "Use the output for print-on-demand design workflows, production art cleanup, and faster creative iteration.",
   ];
 
-  const visualFlow = [
+  const visualPipeline = [
     {
-      title: "Upload the reference image",
+      title: "Start with a clean dashboard and upload flow",
       description:
-        "Start with a product photo, listing image, mockup, or design screenshot that contains the artwork you want to isolate.",
-      image: "/ForCodex/preview3.webp",
+        "Users land inside the app, upload a product mockup or listing image, and prepare the reference artwork for extraction.",
+      image: "/ForCodex/Step1.jpg",
     },
     {
-      title: "Extract the design prompt",
+      title: "Drop in the product image or design reference",
       description:
-        "DesignDistiller breaks out the design summary, PNG prompt, SVG prompt, and negative prompt so you can work from clean production guidance.",
-      image: "/ForCodex/preview1.webp",
+        "The pipeline starts with a shirt graphic, tumbler design, mockup, or listing image that contains artwork hidden inside the product presentation.",
+      image: "/ForCodex/Step2.jpg",
     },
     {
-      title: "Generate the clean standalone artwork",
+      title: "Generate the extracted design summary and prompt set",
       description:
-        "Use the extracted prompt to replicate the art into a cleaner print-ready image, ready for download or further refinement.",
-      image: "/ForCodex/preview2.webp",
+        "DesignDistiller analyzes the image and returns a design summary, PNG prompt, SVG prompt, and production-ready direction for the isolated artwork.",
+      image: "/ForCodex/Step3.jpg",
+    },
+    {
+      title: "Refine the extracted output for production",
+      description:
+        "Users can edit the generated prompt text, keep the visual direction they want, and improve the result before creating the cleaned artwork.",
+      image: "/ForCodex/Step4.jpg",
+    },
+    {
+      title: "Recreate the standalone printable artwork",
+      description:
+        "The final step uses the extracted design guidance to generate a cleaner, standalone PNG-style artwork that is closer to print-ready output.",
+      image: "/ForCodex/step5.jpg",
     },
   ];
 
@@ -272,11 +284,11 @@ export function LandingPage() {
         className="border-y border-white/6 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(99,102,241,0.08))] px-4 py-20 sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="mb-14 grid gap-12 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-300">What DesignDistiller does</p>
               <h2 className="mt-4 text-4xl font-bold tracking-tight text-white">
-                See the workflow from mockup to extracted design output
+                See the full pipeline from upload to recreated artwork
               </h2>
               <p className="mt-6 text-lg leading-8 text-stone-300">
                 DesignDistiller is not a mockup maker. It is a design extraction tool for creators who already have
@@ -285,28 +297,38 @@ export function LandingPage() {
                 for print-on-demand, creative ideation, and production cleanup.
               </p>
             </div>
-            <div className="space-y-5">
-              {visualFlow.map((item, index) => (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.08 }}
-                  className="overflow-hidden rounded-3xl border border-white/8 bg-white/4"
-                >
+            <div className="rounded-3xl border border-white/8 bg-white/4 p-5">
+              <img
+                src="/ForCodex/Step3.jpg"
+                alt="DesignDistiller showing the extracted prompt workflow after analyzing a product image"
+                className="h-auto w-full rounded-2xl border border-white/8 object-cover"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-6">
+            {visualPipeline.map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.06 }}
+                className="grid overflow-hidden rounded-3xl border border-white/8 bg-white/4 lg:grid-cols-[1.05fr_0.95fr]"
+              >
+                <div className={cn("p-6 lg:p-8", index % 2 === 1 ? "lg:order-2" : "")}>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-300">Step {index + 1}</p>
+                  <h3 className="mt-3 text-2xl font-semibold text-white">{item.title}</h3>
+                  <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300">{item.description}</p>
+                </div>
+                <div className={cn("border-t border-white/8 bg-stone-950/40 p-4 lg:border-l lg:border-t-0", index % 2 === 1 ? "lg:order-1 lg:border-l-0 lg:border-r" : "")}>
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="h-auto w-full object-cover"
+                    className="h-auto w-full rounded-2xl border border-white/8 object-cover"
                   />
-                  <div className="p-5">
-                    <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-300">Step {index + 1}</p>
-                    <h3 className="mt-2 text-xl font-semibold text-white">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-stone-300">{item.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
